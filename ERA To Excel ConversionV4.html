@@ -1,0 +1,1508 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Denial Claim Workbench</title>
+<style>
+:root{--bg:#f5f7fa;--card:#fff;--ink:#1c2330;--muted:#5d6779;--line:#e1e5ec;--accent:#1f4e78;--accent-ink:#fff;--soft:#e9f0f8;--code:#0f3d66;
+--red:#b42318;--red-bg:#fdecea;--amb:#8a5a00;--amb-bg:#fff4d6;--grn:#13693a;--grn-bg:#e5f5ea;--gry:#4a5361;--gry-bg:#eceff3;--sel:#fff9e6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11151b;--card:#1a1f27;--ink:#e6e9ef;--muted:#9aa4b5;--line:#2b323d;--accent:#5e9bd6;--accent-ink:#0b1220;--soft:#1e2a38;--code:#a9cdf2;
+--red:#ff958c;--red-bg:#3b1f1f;--amb:#f2c66d;--amb-bg:#3a321c;--grn:#86d9a4;--grn-bg:#1b3325;--gry:#c3cad6;--gry-bg:#2a303a;--sel:#2c2a1d}}
+:root[data-theme="dark"]{--bg:#11151b;--card:#1a1f27;--ink:#e6e9ef;--muted:#9aa4b5;--line:#2b323d;--accent:#5e9bd6;--accent-ink:#0b1220;--soft:#1e2a38;--code:#a9cdf2;--red:#ff958c;--red-bg:#3b1f1f;--amb:#f2c66d;--amb-bg:#3a321c;--grn:#86d9a4;--grn-bg:#1b3325;--gry:#c3cad6;--gry-bg:#2a303a;--sel:#2c2a1d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",system-ui,-apple-system,Arial,sans-serif}
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:16px;max-width:1400px;margin:0 auto}
+h1{font-size:21px;margin:0}
+.sub{margin:2px 0 0;color:var(--muted);font-size:13px}
+.wrap{max-width:1400px;margin:0 auto;padding:0 16px 48px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 14px;border-radius:8px;font:600 13px inherit;font-family:inherit;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.sm{padding:5px 10px;font-size:12px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.upload{border:2px dashed var(--line);border-radius:12px;background:var(--card);padding:16px;margin-bottom:14px}
+.upload.drag{border-color:var(--accent);background:var(--soft)}
+.upload input[type=file]{display:none}
+.link{color:var(--accent);font-weight:700;cursor:pointer;text-decoration:underline}
+.small{font-size:12px}.muted{color:var(--muted)}
+.uprow{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.log{margin-top:8px;font-size:12.5px}
+.log div{padding:3px 0;border-top:1px solid var(--line)}
+.log .ok{color:var(--grn)}.log .warn{color:var(--amb)}.log .err{color:var(--red)}
+.tabs{display:flex;gap:6px;margin:6px 0 12px;flex-wrap:wrap}
+.tabs button{border:none;background:var(--soft);color:var(--accent);padding:7px 14px;border-radius:999px;font:700 13px inherit;font-family:inherit;cursor:pointer}
+.tabs button.on{background:var(--accent);color:var(--accent-ink)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpi b{display:block;font-size:19px}
+.kpi span{font-size:12px;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.filters input[type=search],.filters select,.searchbox{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:13px inherit;font-family:inherit}
+.filters input[type=search]{flex:1 1 220px;min-width:180px}
+.filters label{font-size:13px;display:flex;gap:5px;align-items:center}
+.tbl{overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:10px;max-height:70vh}
+table{border-collapse:collapse;width:100%}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-size:13px}
+th{background:var(--accent);color:var(--accent-ink);position:sticky;top:0;z-index:1;font-size:12px;white-space:nowrap}
+#grid{min-width:1100px}
+#grid tbody tr{cursor:pointer}
+#grid tbody tr:hover{background:var(--soft)}
+td.num,th.num{text-align:right;white-space:nowrap}
+.cpt{font-weight:700;color:var(--code);white-space:nowrap}
+code,.icd{font-family:Consolas,"Courier New",monospace;font-weight:700;color:var(--code)}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.p-red{background:var(--red-bg);color:var(--red)}.p-amb{background:var(--amb-bg);color:var(--amb)}.p-grn{background:var(--grn-bg);color:var(--grn)}.p-gry{background:var(--gry-bg);color:var(--gry)}
+.codes{font-size:12px;color:var(--muted);max-width:220px}
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(760px,100%);background:var(--bg);z-index:21;overflow:auto;box-shadow:-8px 0 24px rgba(0,0,0,.25);padding:0 0 32px}
+#teach{position:fixed;top:3vh;left:50%;transform:translateX(-50%);width:min(960px,96vw);max-height:94vh;overflow:auto;background:var(--bg);z-index:23;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.35);padding:0 0 20px}
+#teach .rowpick{display:block;width:100%;text-align:left;font:12px Consolas,monospace;padding:5px 8px;margin:3px 0;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);cursor:pointer;white-space:pre-wrap;word-break:break-all}
+#teach .rowpick:hover{border-color:var(--accent)}
+#teach select,#teach input[type=text],.uprow select{padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink);font:13px inherit;font-family:inherit}
+.log button{margin-left:8px}
+.dh{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--line);padding:14px 16px;display:flex;justify-content:space-between;gap:10px;z-index:2}
+.dh h2{margin:0;font-size:18px}
+.db{padding:12px 16px}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:6px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0}
+.meta div span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+h3{font-size:15px;margin:18px 0 8px;color:var(--accent)}
+h4{font-size:13px;margin:12px 0 6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}
+.card.sel{background:var(--sel);border-color:var(--amb)}
+.ch{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;font-weight:600}
+.issue{border-left:4px solid var(--line);padding:6px 10px;margin:6px 0;background:var(--bg);border-radius:0 6px 6px 0}
+.issue.deny{border-color:var(--red)}.issue.dx{border-color:#c00000}.issue.cob{border-color:var(--amb)}.issue.pr{border-color:var(--accent)}.issue.info{border-color:var(--line)}
+.issue .fix{margin-top:3px}
+.issue .fix b{color:var(--grn)}
+.banner{padding:8px 10px;border-radius:8px;margin:6px 0;font-size:13px}
+.b-red{background:var(--red-bg);color:var(--red)}.b-amb{background:var(--amb-bg);color:var(--amb)}.b-grn{background:var(--grn-bg);color:var(--grn)}.b-gry{background:var(--gry-bg);color:var(--gry)}
+.dxrow{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.dxrow input{flex:1 1 200px;padding:6px 9px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink);font:13px Consolas,monospace}
+.chip{display:inline-block;border:1px solid var(--line);background:var(--soft);border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0;font-size:12px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+textarea{width:100%;min-height:52px;padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink);font:13px inherit;font-family:inherit}
+.rv{background:var(--soft);border-radius:8px;padding:8px 10px;font-size:13px}
+ol.steps{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 12px 12px 30px;margin:0}
+ol.steps li{margin:4px 0}
+pre{white-space:pre-wrap;font-size:12px;background:var(--bg);padding:8px;border-radius:6px;margin:4px 0}
+details summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
+.mini{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:8px}
+.mini td,.mini th{font-size:12.5px;padding:5px 8px}
+.mini th{position:static}
+.ref td ul{margin:0;padding-left:16px}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+@media (max-width:640px){.top{padding:12px 16px}h1{font-size:18px}.tbl{max-height:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Denial Claim Workbench</h1>
+    <p class="sub">CPT &harr; DX linkage &amp; denial resolution &middot; Coastal Heart Medical Group</p>
+  </div>
+  <div class="actions">
+    <button class="btn primary" id="btnExportX" type="button">Export Excel</button>
+    <button class="btn" id="btnExportC" type="button">Export CSV</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="upload" id="drop">
+    <input type="file" id="file" multiple accept=".pdf,.835,.edi,.era,.x12,.dat,.rmt,.rpt,.prn,.txt,.zip,.xlsx,.xls,.xlsm,.csv,.docx,.doc,.jpg,.jpeg,.png,.tif,.tiff">
+    <div><strong>Upload EOBs / remits / claim files</strong> &mdash; drag &amp; drop here or <label for="file" class="link">browse</label>. Accepts raw 835 ERA files (.835/.edi/.era/.txt from Availity, Waystar, TriZetto, Office Ally or any clearinghouse), PDF EOBs from any PM system (text or scanned), ZIP batches, Excel/CSV exports, Word (.docx) and images.</div>
+    <div class="small muted" style="margin-top:4px"><b>Best accuracy:</b> upload the raw 835 file &mdash; every PM system (AdvancedMD, Athena, Kareo/Tebra, eCW, NextGen, Epic, CareCloud, DrChrono, Office Ally, WebPT …) receives the same 835, so it reads exactly. Printed PDF EOBs are read by automatic column detection; the upload log shows the format detected and whether totals match the document.</div>
+    <div class="small muted" style="margin-top:4px">Files are read only inside this browser &mdash; nothing is uploaded to a server. PDF, Excel, Word and image reading uses free libraries downloaded from a CDN, so an internet connection is needed for those. Scanned PDFs and images are read with OCR (slower). Auto-extracted values should be verified against the EOB.</div>
+    <div class="uprow">
+      <button class="btn sm" id="btnClear" type="button">Clear all claims</button>
+      <label class="small" style="display:flex;gap:6px;align-items:center">Billing system: <select id="sysSel" aria-label="Billing system"></select></label>
+      <button class="btn sm" id="btnTeach" type="button">Teach a layout</button>
+      <button class="btn sm" id="btnLayExp" type="button">Export saved layouts</button>
+      <label class="btn sm" style="display:inline-block">Import layouts<input type="file" id="layImp" accept=".json" hidden></label>
+      <button class="btn sm" id="btnLayReset" type="button">Reset layouts</button>
+      <span class="small muted" id="layInfo"></span>
+    </div>
+    <div class="log" id="log"></div>
+  </section>
+
+  <nav class="tabs" role="tablist">
+    <button type="button" data-tab="claims" class="on">Claims</button>
+    <button type="button" data-tab="sum">Summary</button>
+    <button type="button" data-tab="ref">CPT &rarr; DX reference</button>
+    <button type="button" data-tab="codes">Denial code guide</button>
+    <button type="button" data-tab="sys">Billing systems</button>
+  </nav>
+
+  <section id="tab-claims">
+    <div class="kpis" id="kpis"></div>
+    <div class="filters">
+      <input type="search" id="fq" placeholder="Search patient, CPT, DX, code, claim #&hellip;" aria-label="Search claims">
+      <select id="fStatus" aria-label="Status"></select>
+      <select id="fPayer" aria-label="Payer"></select>
+      <select id="fSrc" aria-label="Source file"></select>
+      <label><input type="checkbox" id="fDx"> DX issues only</label>
+      <label><input type="checkbox" id="fOpen"> Open (denied/pending) only</label>
+    </div>
+    <div class="tbl">
+      <table id="grid">
+        <thead><tr><th>Status</th><th>Patient</th><th>DOS</th><th>CPT</th><th>Mod</th><th>DX</th><th class="num">Billed</th><th class="num">Paid</th><th>Codes</th><th>DX check</th><th>Payer</th><th>Source</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="small muted" id="count"></p>
+  </section>
+
+  <section id="tab-sum" hidden>
+    <div class="kpis" id="sumK"></div>
+    <h3>Files processed</h3><div class="tbl"><table id="sumF" style="min-width:860px"></table></div>
+    <h3>By payer</h3><div class="tbl"><table id="sumP" style="min-width:760px"></table></div>
+    <h3>By line status</h3><div class="tbl"><table id="sumS" style="min-width:520px"></table></div>
+    <h3>Top denial / adjustment reasons</h3><div class="tbl"><table id="sumR" style="min-width:860px"></table></div>
+    <p class="small muted">Summary covers all loaded lines. Use Export Excel to download these tables with the line detail.</p>
+  </section>
+
+  <section id="tab-ref" hidden>
+    <input type="search" class="searchbox" id="rq" placeholder="Search CPT, ICD-10 or keyword" style="width:100%;max-width:420px;margin-bottom:10px" aria-label="Search reference">
+    <div class="tbl ref"><table id="refT" style="min-width:760px"><thead><tr><th style="width:190px">CPT / HCPCS</th><th style="width:170px">Service</th><th>DX to link (ICD-10-CM)</th><th style="width:280px">Coding notes</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section id="tab-sys" hidden>
+    <p class="small muted" style="margin-top:0">How each billing system's remittances are read. <b>Raw 835 ERA files are read exactly for every system.</b> Printed EOB/ERA reports are read by the system profile plus automatic column / label detection. A profile becomes <b>Confirmed</b> once one of its files reconciles to the document totals; if a printout is not read correctly use <b>Teach a layout</b> once and it is remembered.</p>
+    <div class="tbl"><table id="sysT" style="min-width:900px"><thead><tr><th>Billing system</th><th>Type</th><th>Detected by</th><th>How it is read</th><th>Status</th><th>Files loaded</th><th>Best file to upload</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section id="tab-codes" hidden>
+    <input type="search" class="searchbox" id="cq" placeholder="Search code or keyword (e.g. N265, auth, COB)" style="width:100%;max-width:420px;margin-bottom:10px" aria-label="Search codes">
+    <div class="tbl"><table id="codeT" style="min-width:760px"><thead><tr><th style="width:110px">Code</th><th style="width:90px">Type</th><th>Meaning</th><th>How to resolve</th><th style="width:80px">DX-related</th></tr></thead><tbody></tbody></table></div>
+  </section>
+</main>
+
+<div id="scrim" hidden></div>
+<aside id="drawer" hidden aria-label="Claim details"></aside>
+<div id="teach" hidden role="dialog" aria-label="Teach layout"></div>
+
+<script>
+'use strict';
+/* ===== Embedded Oct-2026 review batch (26 columns, same order as the DX Review workbooks) ===== */
+const BATCH = /*BATCH_START*/[
+]/*BATCH_END*/;
+
+const COLS=['src','payer','check','checkDate','patient','memberId','acct','icn','claimStatus','dosFrom','dosTo','cpt','mod','units','dx','billed','allowed','paid','ptResp','adj','rarc','rvStatus','rvReason','rvFinding','rvDx','rvAction'];
+const HEAD={src:'Source File',payer:'Payer',check:'Check/EFT #',checkDate:'Check Date',patient:'Patient Name',memberId:'Member ID',acct:'Pt Acct #',icn:'Payer Claim # / ICN',claimStatus:'Claim Status (EOB)',dosFrom:'DOS From',dosTo:'DOS To',cpt:'CPT/HCPCS',mod:'Modifier(s)',units:'Units',dx:'DX on EOB',billed:'Billed',allowed:'Allowed',paid:'Paid',ptResp:'Pt Resp',adj:'Adj / Denial Codes',rarc:'Remark Codes',rvStatus:'Line Status (review)',rvReason:'Denial Reason (review)',rvFinding:'DX Linkage Finding (review)',rvDx:'DX To Link (review)',rvAction:'Action / Next Step (review)'};
+const LIB={xlsx:'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',pdf:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',pdfw:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',mammoth:'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js',tess:'https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js',zip:'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'};
+
+/* ===== Code dictionaries ===== */
+const GROUP={CO:'Contractual obligation – provider liable; do not bill the patient',PR:'Patient responsibility',OA:'Other adjustment',PI:'Payer-initiated reduction',CR:'Correction / reversal',RC:'Reason code (group not printed on EOB)'};
+// sev: deny | cob | pr | info ; dx: diagnosis-related
+const CARC={
+'1':{m:'Deductible amount',sev:'pr',fix:'Bill patient for deductible (not if Medi-Cal / QMB).'},
+'2':{m:'Coinsurance amount',sev:'pr',fix:'Bill patient or secondary payer for coinsurance (not if Medi-Cal / QMB).'},
+'3':{m:'Co-payment amount',sev:'pr',fix:'Collect copay (not if Medi-Cal / QMB).'},
+'4':{m:'Procedure code inconsistent with modifier, or required modifier missing',sev:'deny',fix:'Correct the modifier and send a corrected claim.'},
+'5':{m:'Procedure code inconsistent with place of service',sev:'deny',fix:'Verify POS (11/22/24 etc.) and resubmit.'},
+'6':{m:'Procedure inconsistent with patient age',sev:'deny',fix:'Verify DOB and code choice; resubmit.'},
+'7':{m:'Procedure inconsistent with patient gender',sev:'deny',fix:'Verify demographics and code; resubmit.'},
+'8':{m:'Procedure inconsistent with provider type/specialty',sev:'deny',fix:'Check rendering provider taxonomy/credentialing.'},
+'9':{m:'Diagnosis inconsistent with patient age',sev:'deny',dx:true,fix:'Correct the diagnosis code; corrected claim.'},
+'10':{m:'Diagnosis inconsistent with patient gender',sev:'deny',dx:true,fix:'Correct the diagnosis code; corrected claim.'},
+'11':{m:'Diagnosis inconsistent with the procedure',sev:'deny',dx:true,fix:'Re-link the line to a DX that supports the CPT (see DX linkage below) and send a corrected claim (freq 7).'},
+'15':{m:'Authorization number missing/invalid',sev:'deny',fix:'Add the valid auth number (box 23) and resubmit.'},
+'16':{m:'Claim lacks information or has billing error(s) – see remark codes',sev:'deny',fix:'Fix the item named in the remark code(s) and resubmit.'},
+'18':{m:'Exact duplicate claim/service',sev:'deny',fix:'Check the original claim status; do not rebill.'},
+'22':{m:'May be covered by another payer (coordination of benefits)',sev:'cob',fix:'Bill the primary payer first / attach primary EOB.'},
+'23':{m:'Impact of prior payer adjudication',sev:'cob',fix:'Usually final – primary paid ≥ this plan\'s allowable. Verify primary EOB was applied.'},
+'24':{m:'Covered under a capitation agreement / managed care plan',sev:'deny',fix:'Member is in a managed care plan – bill the plan / IPA on the member\'s card.'},
+'26':{m:'Expenses incurred prior to coverage',sev:'deny',fix:'Verify eligibility; bill the correct payer or patient.'},
+'27':{m:'Expenses incurred after coverage terminated',sev:'deny',fix:'Verify eligibility; bill the correct payer or patient.'},
+'29':{m:'Time limit for filing has expired',sev:'deny',fix:'Appeal only with proof of timely filing (clearinghouse acceptance report); otherwise write off.'},
+'31':{m:'Patient cannot be identified as our insured',sev:'deny',fix:'Verify eligibility, correct member ID / name / DOB and rebill the right payer.'},
+'45':{m:'Charge exceeds fee schedule / contracted amount',sev:'info',fix:'Contractual write-off. If paid > billed, update the charge master.'},
+'49':{m:'Routine / preventive service not covered',sev:'deny',fix:'Use a diagnostic DX if the service was diagnostic; otherwise patient/ABN.'},
+'50':{m:'Not deemed a medical necessity by the payer',sev:'deny',dx:true,fix:'Link a DX covered by the LCD/NCD (see DX linkage) and appeal with records.'},
+'96':{m:'Non-covered charge(s)',sev:'deny',fix:'Check remark code; rebill correctly or write off / bill patient if ABN on file.'},
+'97':{m:'Benefit included in payment for another service (bundled)',sev:'deny',fix:'Review NCCI; add 59/XU only if distinct and documented.'},
+'107':{m:'Related / qualifying claim not received',sev:'deny',fix:'Bill the primary service first, then resubmit.'},
+'109':{m:'Not covered by this payer – send to the correct payer',sev:'deny',fix:'Bill the correct payer / IPA.'},
+'119':{m:'Benefit maximum reached',sev:'deny',fix:'Bill patient/secondary if allowed.'},
+'129':{m:'Prior processing information incorrect',sev:'deny',fix:'Correct the primary payer data and resubmit.'},
+'131':{m:'Claim specific negotiated discount',sev:'info',fix:'Contractual write-off – no action.'},
+'140':{m:'Patient / insured health ID mismatch',sev:'deny',fix:'Correct the member ID and resubmit.'},
+'143':{m:'Portion of payment deferred',sev:'info',fix:'No action – withheld amount.'},
+'146':{m:'Diagnosis invalid for the date of service',sev:'deny',dx:true,fix:'Use the ICD-10 code valid on the DOS (full specificity) and resubmit.'},
+'150':{m:'Information does not support this level of service',sev:'deny',fix:'Review documentation; appeal with notes or rebill lower level.'},
+'151':{m:'Frequency / number of services exceeds payer limit',sev:'deny',fix:'Check frequency limits; appeal with medical necessity.'},
+'167':{m:'This diagnosis is not covered',sev:'deny',dx:true,fix:'Use a covered, documented DX per payer policy; corrected claim or appeal.'},
+'181':{m:'Procedure code invalid on date of service',sev:'deny',fix:'Use the code valid on the DOS.'},
+'182':{m:'Procedure modifier invalid on date of service',sev:'deny',fix:'Correct the modifier.'},
+'197':{m:'Precertification / authorization absent',sev:'deny',fix:'Request retro-authorization; appeal with auth + records.'},
+'198':{m:'Precertification exceeded',sev:'deny',fix:'Request auth extension; appeal.'},
+'200':{m:'Expenses incurred during lapse in coverage',sev:'deny',fix:'Verify eligibility on the DOS; if coverage lapsed, bill the patient or the correct plan; if active, send proof of coverage for reprocessing.'},
+'204':{m:'Service not covered under patient\'s benefit plan',sev:'deny',fix:'Quality G-codes: no action. Otherwise bill patient if allowed.'},
+'226':{m:'Information requested was not provided / insufficient',sev:'deny',fix:'Send the requested records and reprocess.'},
+'234':{m:'Procedure not paid separately',sev:'deny',fix:'Bundled – write off unless distinct (59/XU).'},
+'236':{m:'Procedure/modifier combination not compatible (NCCI)',sev:'deny',fix:'Review NCCI edits; correct modifier.'},
+'242':{m:'Services not provided by network/primary care providers',sev:'deny',fix:'Check network status / referral; appeal.'},
+'246':{m:'Non-payable code – required reporting only',sev:'info',fix:'No action (quality code).'},
+'252':{m:'Attachment / other documentation required',sev:'deny',fix:'Submit documentation (PWK) and reprocess.'},
+'253':{m:'Sequestration – reduction in federal payment',sev:'info',fix:'No action (2% sequestration).'},
+'A1':{m:'Claim/service denied – see remark code',sev:'deny',fix:'Follow the remark code.'},
+'B7':{m:'Provider not certified/eligible for this service on DOS',sev:'deny',fix:'Check credentialing/enrollment.'},
+'B9':{m:'Patient enrolled in hospice',sev:'deny',fix:'Bill hospice, or use GW modifier if unrelated.'},
+'B11':{m:'Claim transferred to the proper payer (misrouted)',sev:'deny',fix:'Bill the delegated IPA / PPG responsible for the member.'},
+'B15':{m:'Qualifying service/procedure not received',sev:'deny',fix:'Bill the primary/qualifying service.'},
+'B16':{m:'"New patient" qualifications not met',sev:'deny',fix:'Rebill as established patient (e.g., 99214 for 99204).'}
+};
+const RARC={
+'M25':{m:'Information does not substantiate the need for this level of service',sev:'deny',dx:true,fix:'Strengthen DX linkage and documentation; appeal with records.'},
+'M51':{m:'Missing/incomplete/invalid procedure code',sev:'deny',fix:'Use a valid code for this payer (quality G-codes: stop billing a charge).'},
+'M52':{m:'Missing/incomplete/invalid "from" date of service',sev:'deny',fix:'Bill the correct DOS (single date / calendar month for PCM/RPM).'},
+'M54':{m:'Missing/incomplete/invalid total charges',sev:'deny',fix:'Correct the charge amount and resubmit.'},
+'M76':{m:'Missing/incomplete/invalid diagnosis or condition',sev:'deny',dx:true,fix:'Add a valid, specific ICD-10 code and resubmit.'},
+'M77':{m:'Missing/incomplete/invalid place of service',sev:'deny',fix:'Correct POS and resubmit.'},
+'M78':{m:'Missing/incomplete/invalid HCPCS/CPT modifier',sev:'deny',fix:'Correct the modifier and resubmit.'},
+'M79':{m:'Missing/incomplete/invalid charge',sev:'deny',fix:'Correct the charge.'},
+'M81':{m:'Code to the highest level of specificity',sev:'deny',dx:true,fix:'Use the full-length ICD-10 code (all characters) and resubmit.'},
+'MA01':{m:'Alert: appeal rights – 120 days',sev:'info',fix:'Appeal (redetermination) within 120 days if you disagree.'},
+'MA04':{m:'Secondary payment cannot be considered without primary payer info',sev:'cob',fix:'Attach the primary EOB / payer info and resubmit.'},
+'MA07':{m:'Alert: claim forwarded to Medicaid',sev:'info',fix:'Watch for the Medi-Cal crossover remit.'},
+'MA13':{m:'Alert: penalties for billing patient beyond PR amounts',sev:'info',fix:'Do not bill the patient for CO amounts.'},
+'MA15':{m:'Alert: claim split to expedite handling',sev:'info',fix:'Look for a separate remit with the other lines.'},
+'MA18':{m:'Alert: forwarded to supplemental insurer',sev:'info',fix:'Watch for the secondary payment.'},
+'MA63':{m:'Missing/incomplete/invalid principal diagnosis',sev:'deny',dx:true,fix:'Add the principal DX and resubmit.'},
+'MA114':{m:'Missing/incomplete/invalid service facility information',sev:'deny',fix:'Add service facility name/address/NPI (box 32) and resubmit.'},
+'MA130':{m:'Incomplete/invalid information – submit as a new claim',sev:'deny',fix:'Correct and submit a new claim (no appeal).'},
+'M127':{m:'Missing patient medical record for this service',sev:'deny',fix:'Send the operative/procedure note and records (CO-252) and request reprocessing.'},
+'N19':{m:'Procedure code incidental to primary procedure',sev:'deny',fix:'Bundled (e.g., fluoroscopic guidance 77002/76942 with the injection) – write off unless distinct and documented (59/XU).'},
+'N657':{m:'Should be billed with the appropriate code for this service',sev:'deny',fix:'Use the correct code/modifier (e.g., modifier 93 audio-only not accepted – rebill with 95 if video, or the correct telephone/E-M code).'},
+'N674':{m:'Not covered unless a pre-requisite procedure/service has been provided',sev:'deny',fix:'Bill the qualifying primary service on the same claim, or link to it; add-on/guidance codes need the primary procedure.'},
+'N770':{m:'Adjustment request processed – original claim adjusted/voided',sev:'info',fix:'Check the replacement claim; no action if the corrected claim was paid.'},
+'N788':{m:'Review organization did not receive required authorization information',sev:'deny',fix:'Obtain/submit the auth to the TPA/utilization-review vendor (e.g., Carelon/AIM for pain procedures) and request reprocessing.'},
+'N816':{m:'Payer-specific / unknown remit code',sev:'deny',fix:'For drug lines (J-codes) the usual cause is a missing or invalid NDC – add the 11-digit NDC with N4 qualifier, unit (UN/ML/MG) and quantity, then resubmit. Otherwise call the payer for the reason.'},
+'N23':{m:'Alert: patient liability may be affected by coordination of benefits',sev:'info',fix:'No action – secondary/COB alert.'},
+'N36':{m:'Claim must meet primary payer\'s processing requirements before we can consider payment',sev:'cob',fix:'The primary denied/did not allow this line – fix it with the primary first (e.g., auth, modifier, coverage), then resubmit to the secondary with the primary EOB.'},
+'N220':{m:'Alert: see payer website for provider dispute forms',sev:'info',fix:'Use the payer dispute form if appealing.'},
+'N20':{m:'Service not payable with other service on the same date',sev:'deny',fix:'Review NCCI / bundling.'},
+'N29':{m:'Missing documentation / orders / notes',sev:'deny',fix:'Send the documentation.'},
+'N56':{m:'Procedure code billed is not correct/valid for the services',sev:'deny',fix:'Correct the CPT.'},
+'N115':{m:'Decision based on a Local Coverage Determination (LCD)',sev:'deny',dx:true,fix:'Check the LCD covered-DX list; re-link a covered DX and appeal.'},
+'N130':{m:'Consult plan benefit documents',sev:'info',fix:'Review plan benefits.'},
+'N152':{m:'Missing/incomplete/invalid replacement claim information',sev:'deny',fix:'Resubmit with frequency code 7 and the original claim number.'},
+'N211':{m:'Alert: you may not appeal this decision',sev:'info',fix:'Not appealable.'},
+'N265':{m:'Missing/invalid ordering provider primary identifier',sev:'deny',fix:'Add ordering provider name + NPI (box 17/17b) and resubmit.'},
+'N276':{m:'Missing/invalid other-payer referring provider identifier',sev:'deny',fix:'Add referring provider identifier and resubmit.'},
+'N286':{m:'Missing/invalid referring provider primary identifier',sev:'deny',fix:'Add referring provider NPI (box 17b) and resubmit.'},
+'N290':{m:'Missing/invalid rendering provider identifier',sev:'deny',fix:'Add rendering NPI (24J) and resubmit.'},
+'N362':{m:'Units exceed acceptable maximum',sev:'deny',fix:'Correct units (MUE).'},
+'N377':{m:'Payment based on a processed replacement claim',sev:'info',fix:'No action.'},
+'N386':{m:'Decision based on a National Coverage Determination (NCD)',sev:'deny',dx:true,fix:'Link an NCD-covered DX, document criteria, appeal.'},
+'N418':{m:'Misrouted claim – see payer submission instructions',sev:'deny',fix:'Bill the delegated IPA / PPG.'},
+'N425':{m:'Statutorily excluded service',sev:'deny',fix:'Bill patient if ABN on file.'},
+'N620':{m:'Alert: code for quality reporting only',sev:'info',fix:'No action.'},
+'N694':{m:'Alert: reversal due to resubmission/change by provider',sev:'info',fix:'No action – see replacement claim.'},
+'N704':{m:'Alert: cannot appeal; resubmit with corrected info',sev:'info',fix:'Do not appeal – submit a corrected/new claim.'},
+'N776':{m:'Service is not a covered telehealth service',sev:'deny',fix:'Rebill without 93 if video was used; otherwise write off per contract.'},
+'N781':{m:'Patient is Medicaid/QMB – review deductible collected',sev:'pr',fix:'Do not collect deductible from QMB patient; refund if collected.'},
+'N782':{m:'Patient is Medicaid/QMB – review coinsurance collected',sev:'pr',fix:'Do not collect coinsurance/copay from QMB patient; refund if collected.'},
+'N822':{m:'Missing procedure modifier(s)',sev:'deny',fix:'Add the required modifier (26/TC, RT/LT, 59/XU) and resubmit.'},
+'N823':{m:'Incomplete/invalid procedure modifier(s)',sev:'deny',fix:'Correct the modifier and resubmit.'}
+};
+// payer-specific codes (payer regex limits where they apply)
+const PAYER={
+'NMCAL':{m:'Non-payable Medi-Cal service (Physicians Health Network)',sev:'deny',fix:'Bill the correct plan, or write off per contract.'},
+'UD3':{m:'Not authorized',sev:'deny',fix:'Obtain retro-auth; resubmit with auth number and records.'},
+'UDAUTH':{m:'No authorization – submit medical records for review',sev:'deny',fix:'Submit records for retro review / obtain auth.'},
+'DCS':{m:'IEHP: exact duplicate claim/service',sev:'deny',fix:'Check original claim; do not rebill.',payer:/iehp|inland/i},
+'ECE260':{m:'IEHP: bundled into another service',sev:'deny',fix:'Review NCCI; add modifier only if distinct.',payer:/iehp|inland/i},
+'COBT':{m:'IEHP: impact of prior payer adjudication',sev:'cob',fix:'Attach the primary EOB / verify primary payment.',payer:/iehp|inland/i},
+'COBM':{m:'IEHP: COB – coinsurance amount paid as secondary',sev:'info',fix:'No action.',payer:/iehp|inland/i},
+'CE2':{m:'IEHP: charge exceeds fee schedule',sev:'info',fix:'Contractual write-off.',payer:/iehp|inland/i},
+'A1':{m:'IEHP: charge exceeds fee schedule',sev:'info',fix:'Contractual write-off.',payer:/iehp|inland/i},
+'G60':{m:'WC: service appears unrelated to the claimed work injury',sev:'deny',dx:true,fix:'DX not tied to the industrial injury – bill the health plan, or link the accepted injury DX and request second review.',payer:/hartford|comp/i},
+'269':{m:'WC: billing is for a service unrelated to the work injury',sev:'deny',dx:true,fix:'Bill the patient\'s health plan.',payer:/hartford|comp/i},
+'G10':{m:'WC: necessary documentation missing',sev:'deny',fix:'Resubmit with documentation.',payer:/hartford|comp/i},
+'531':{m:'WC: resubmit with the appropriate HCPCS/CPT code',sev:'deny',fix:'Use 99401–99404 instead of Medicare-only G0446.',payer:/hartford|comp/i}
+};
+
+/* ===== CPT -> DX crosswalk ===== */
+const D={I10:'Essential (primary) hypertension','I11.9':'Hypertensive heart disease w/o heart failure','I11.0':'Hypertensive heart disease w/ heart failure','I25.10':'ASHD of native coronary artery w/o angina','I48.91':'Unspecified atrial fibrillation','I50.9':'Heart failure, unspecified','R07.9':'Chest pain, unspecified','R07.89':'Other chest pain','R00.2':'Palpitations','R00.0':'Tachycardia, unspecified','R00.1':'Bradycardia, unspecified','I73.9':'Peripheral vascular disease, unspecified','R94.31':'Abnormal electrocardiogram','Z01.810':'Encounter for preprocedural cardiovascular exam','Z79.01':'Long term (current) use of anticoagulants','I26.99':'Other pulmonary embolism w/o acute cor pulmonale','Z95.2':'Presence of prosthetic heart valve','R01.1':'Cardiac murmur, unspecified','R06.02':'Shortness of breath','I35.0':'Nonrheumatic aortic (valve) stenosis','I34.0':'Nonrheumatic mitral (valve) insufficiency','I42.9':'Cardiomyopathy, unspecified','R55':'Syncope and collapse','R42':'Dizziness and giddiness','I49.9':'Cardiac arrhythmia, unspecified','Z95.0':'Presence of cardiac pacemaker','Z95.810':'Presence of automatic (implantable) cardiac defibrillator','I44.2':'Atrioventricular block, complete','I49.5':'Sick sinus syndrome','I65.21':'Occlusion and stenosis of right carotid artery','I65.22':'Occlusion and stenosis of left carotid artery','I65.23':'Occlusion and stenosis of bilateral carotid arteries','I65.29':'Occlusion and stenosis of unspecified carotid artery','R09.89':'Other specified circulatory/respiratory signs (bruit)','G45.9':'Transient cerebral ischemic attack, unspecified','Z86.73':'Personal hx of TIA / cerebral infarction w/o residual deficits','I70.211':'Atherosclerosis native arteries, right leg, intermittent claudication','I70.212':'Atherosclerosis native arteries, left leg, intermittent claudication','I70.213':'Atherosclerosis native arteries, bilateral legs, intermittent claudication','I70.221':'Atherosclerosis native arteries, right leg, rest pain','I70.222':'Atherosclerosis native arteries, left leg, rest pain','E11.51':'Type 2 DM w/ diabetic peripheral angiopathy w/o gangrene','I83.811':'Varicose veins of right lower extremity with pain','I83.812':'Varicose veins of left lower extremity with pain','I83.813':'Varicose veins of bilateral lower extremities with pain','I83.891':'Varicose veins of right lower extremity w/ other complications','I83.892':'Varicose veins of left lower extremity w/ other complications','I87.2':'Venous insufficiency (chronic)(peripheral)','M79.604':'Pain in right leg','M79.605':'Pain in left leg','R60.0':'Localized edema','I82.401':'Acute DVT of unspecified deep veins of right lower extremity','I82.402':'Acute DVT of unspecified deep veins of left lower extremity','N18.6':'End stage renal disease','Z99.2':'Dependence on renal dialysis','T82.858A':'Stenosis of vascular prosthetic device/graft, initial','T82.868A':'Thrombosis of vascular prosthetic device/graft, initial','I70.0':'Atherosclerosis of aorta','E11.40':'Type 2 DM w/ diabetic neuropathy, unspecified','E11.42':'Type 2 DM w/ diabetic polyneuropathy','G90.09':'Other idiopathic peripheral autonomic neuropathy','G60.9':'Hereditary and idiopathic neuropathy, unspecified','I74.3':'Embolism and thrombosis of arteries of lower extremities','I74.4':'Embolism and thrombosis of arteries of extremities, unspecified','I20.9':'Angina pectoris, unspecified','I20.89':'Other forms of angina pectoris','I25.112':'ASHD native coronary artery w/ refractory angina pectoris','I25.118':'ASHD native coronary artery w/ other forms of angina','I25.119':'ASHD native coronary artery w/ unspecified angina','Z71.89':'Other specified counseling','E78.5':'Hyperlipidemia, unspecified',
+'M47.812':'Spondylosis w/o myelopathy or radiculopathy, cervical','M47.816':'Spondylosis w/o myelopathy or radiculopathy, lumbar','M47.817':'Spondylosis w/o myelopathy or radiculopathy, lumbosacral','M47.818':'Spondylosis w/o myelopathy or radiculopathy, sacral/sacrococcygeal','M54.50':'Low back pain, unspecified','M54.2':'Cervicalgia','M54.16':'Radiculopathy, lumbar region','M54.17':'Radiculopathy, lumbosacral region','M54.12':'Radiculopathy, cervical region','M51.16':'Intervertebral disc disorders w/ radiculopathy, lumbar','M51.17':'Intervertebral disc disorders w/ radiculopathy, lumbosacral','M48.062':'Spinal stenosis, lumbar, with neurogenic claudication','M46.1':'Sacroiliitis, not elsewhere classified','M53.3':'Sacrococcygeal disorders, NEC','M53.2X8':'Spinal instabilities, sacral and sacrococcygeal region','G89.29':'Other chronic pain','G89.4':'Chronic pain syndrome','M25.561':'Pain in right knee','G57.91':'Unspecified mononeuropathy of right lower limb','M79.18':'Myalgia, other site','M62.830':'Muscle spasm of back','G56.01':'Carpal tunnel syndrome, right upper limb','G56.02':'Carpal tunnel syndrome, left upper limb','M17.11':'Unilateral primary osteoarthritis, right knee','M17.12':'Unilateral primary osteoarthritis, left knee','Z45.1':'Encounter for adjustment and management of infusion pump','M96.1':'Postlaminectomy syndrome, NEC','G90.522':'Complex regional pain syndrome I of left lower limb','Z79.891':'Long term (current) use of opiate analgesic','Z51.81':'Encounter for therapeutic drug level monitoring','Z79.899':'Other long term (current) drug therapy','Z01.818':'Encounter for other preprocedural examination','F41.9':'Anxiety disorder, unspecified','F32.A':'Depression, unspecified','M99.01':'Segmental and somatic dysfunction of cervical region','M99.02':'Segmental and somatic dysfunction of thoracic region','M99.03':'Segmental and somatic dysfunction of lumbar region','M99.04':'Segmental and somatic dysfunction of sacral region'};
+const VASC=['I70.2','I70.3','I70.4','I70.5','I70.6','I70.7','I73','I74','I77','E08.51','E09.51','E10.51','E11.51','E13.51','L97','M79.6','R02'];
+const XW=[
+ {codes:'99202–99205, 99211–99215',name:'Office / outpatient E/M',re:/^992(0[2-5]|1[1-5])$/,any:true,bad:['Z00.0','Z00.1','Z13.','Z12.'],show:['I10','I11.9','I25.10','I48.91','I50.9','R07.9','R00.2','I73.9'],note:'Pointer 1 = main reason for the visit. Modifier 25 only with a separately identifiable E/M. New-patient codes only if not seen by the group in 3 years (else CO-B16). Audio-only (93) is often non-covered.'},
+ {codes:'G2211',name:'Visit complexity add-on',re:/^G2211$/,pre:['I','E1','E66','E78','N18','J44','G47'],show:['I10','I25.10','I48.91','I50.9'],note:'Same chronic condition as the E/M; requires an ongoing longitudinal relationship.'},
+ {codes:'93000, 93005, 93010',name:'ECG 12-lead',re:/^930(00|05|10)$/,pre:['R07','R00','R01','R06','R55','R42','R94.31','R53','I','Z01.81','Z95','Z79','E87','T46'],show:['R07.9','R00.2','R00.0','R00.1','I48.91','I10','I25.10','R94.31','Z01.810'],note:'Avoid Z00.00 screening for Medicare. Bill 1 unit unless a second tracing is documented (76/XU).'},
+ {codes:'85610',name:'PT / INR',re:/^85610$/,pre:['Z79.01','Z79.02','I48','I26','I82','I80','Z95.2','Z86.7','D68'],show:['Z79.01','I48.91','I26.99','Z95.2'],note:'Add QW for a CLIA-waived point-of-care test.'},
+ {codes:'93303–93308, 93350–93351',name:'Echocardiography',re:/^933(0[3-8]|5[01])$/,pre:['R01','R06','R07','R00','R55','R60','R94.3','I50','I35','I34','I36','I37','I42','I48','I11.0','I13','I21','I24','I25','I27','I31','I51','I63','Q2','Z95'],show:['R01.1','R06.02','I50.9','I35.0','I34.0','I42.9','I11.0','I48.91','R00.2'],note:'Uncomplicated hypertension (I10) alone usually does not support an echo.'},
+ {codes:'93224–93229, 93241–93248, 93268–93272',name:'Holter / extended ECG / MCOT',re:/^932(2[4-9]|4[1-8]|6[89]|7[0-2])$/,pre:['R00','R55','R42','R94.31','R06','R07','R53','I47','I48','I49','I44','I45','I63','G45','Z86.79','Z95'],show:['R00.2','R55','R42','I48.91','I49.9','R00.0','R00.1'],note:'MCOT needs symptoms not captured by Holter or high-risk arrhythmia suspicion.'},
+ {codes:'93279–93299',name:'Pacemaker / ICD evaluation',re:/^932(79|8\d|9\d)$/,pre:['Z95','Z45.0','I44','I45','I47','I48','I49','I50','I42','R55'],show:['Z95.0','Z95.810','I44.2','I49.5'],note:'Pair Z95.x with the underlying rhythm / HF diagnosis.'},
+ {codes:'93880, 93882',name:'Carotid duplex',re:/^9388[02]$/,pre:['I65','I63','I66','G45','Z86.73','R09.89','I67.2','H34','R47','R29.8'],show:['I65.21','I65.22','I65.23','I65.29','R09.89','G45.9','Z86.73'],note:'Dizziness (R42) alone is not supported under most carotid LCDs.'},
+ {codes:'93922–93924',name:'ABI / physiologic arterial study',re:/^9392[2-4]$/,pre:VASC,show:['I70.211','I70.212','I70.213','I73.9','E11.51'],note:'Same-day with 93925/93926 is often not separately payable.'},
+ {codes:'93925, 93926',name:'LE arterial duplex',re:/^9392[56]$/,pre:VASC,show:['I70.211','I70.212','I70.213','I70.221','I70.222','I73.9'],note:'93926 (unilateral) needs a side-specific DX matching RT/LT. Asymptomatic screening is non-covered.'},
+ {codes:'93970, 93971, 93965',name:'LE venous duplex / physiologic',re:/^939(70|71|65)$/,pre:['I83','I87','I80','I82','I86','I89.0','M79.6','R60','L97','Z86.71','T82.8'],show:['I83.811','I83.812','I83.813','I87.2','M79.604','M79.605','R60.0','I82.401','I82.402'],note:'93971 laterality must match the modifier (RT → …1, LT → …2). Noridian requires ordering/referring NPI (box 17).'},
+ {codes:'93985, 93986, 93990',name:'Hemodialysis access duplex',re:/^939(85|86|90)$/,pre:['N18.5','N18.6','N18.4','Z99.2','T82.5','T82.8','Z49','I77.0'],show:['N18.6','Z99.2','T82.858A','T82.868A'],note:'Not for routine leg venous studies.'},
+ {codes:'93050',name:'Arterial pressure waveform analysis',re:/^93050$/,pre:['I10','I11','I12','I13','I15','I16','I70','I73','I25','I50'],show:['I10','I70.0','I73.9'],note:'Medicare often treats this as incidental / non-covered.'},
+ {codes:'95921–95924',name:'Autonomic / sudomotor testing',re:/^9592[1-4]$/,pre:['E08.4','E09.4','E10.4','E11.4','E13.4','G90','G60','G62','G63','G64','R55','I95'],show:['E11.40','E11.42','G90.09','G60.9'],note:'Limited LCD coverage; document autonomic symptoms.'},
+ {codes:'75710, 75716',name:'Extremity angiography',re:/^7571[06]$/,pre:VASC.concat(['I72.4']),show:['I70.211','I70.212','I70.221','I74.3','I74.4'],note:'Add 26 (professional) and RT/LT; a missing modifier returns CO-16/N822.'},
+ {codes:'78451–78454, 93015–93018, J2785, A9500, A9502',name:'Stress test / SPECT MPI / agents',re:/^(7845[1-4]|9301[5-8]|J2785|A9500|A9502)$/,pre:['R07','R06','R00','R55','R53.83','R94.3','I20','I21','I24','I25','I48','I49','I50','I42','I35','Z01.81','Z95.1','Z95.5'],show:['R07.9','R07.89','I20.9','I25.10','R06.02','R94.31','Z01.810'],note:'Use the same DX on every line of the study. Include the service facility (box 32) – missing = CO-16/MA114.'},
+ {codes:'G0166, 92971',name:'External counterpulsation (EECP)',re:/^(G0166|92971)$/,pre:['I20','I25.11','I25.7'],show:['I25.112','I25.118','I25.119','I20.89','I20.9'],note:'NCD 20.20: document CCS Class III/IV angina and that the patient is not a candidate for PCI/CABG. Wrong DX → CO-50/M25/N386.'},
+ {codes:'G0446',name:'Intensive behavioral therapy for CVD',re:/^G0446$/,pre:['Z71','I10','I11','E78','E66','Z68','I25','Z82.4','R73','E11'],show:['Z71.89','I10','E78.5'],note:'Medicare-only code; commercial / workers\' comp use 99401–99404. Usually 59/XU with a same-day E/M.'},
+ {codes:'99445, 99453–99458, 99091, 99424–99427, 99439, 99487–99491',name:'RPM / PCM / CCM',re:/^99(445|45[3-8]|091|42[4-7]|439|48[79]|49[01])$/,pre:['I','E1','E0','E66','E78','J44','J45','N18','G47.33'],show:['I10','I50.9','I48.91','I11.0'],note:'99454 = 16+ days of readings, 99445 = 2–15 days. 99458 needs 99457 in the same month. PCM/CCM once per calendar month (a date span returns M52). Many Medi-Cal plans need auth.'},
+ {codes:'36465–36483',name:'Venous ablation / foam sclerotherapy',re:/^364(6[5-9]|7\d|8[0-3])$/,pre:['I83','I87','I80'],show:['I83.811','I83.812','I83.813','I83.891','I83.892','I87.2'],note:'Laterality must match RT/LT/50. Prior auth usually required (CO-197).'},
+ {codes:'36901–36909',name:'Dialysis circuit intervention',re:/^3690\d$/,pre:['N18.5','N18.6','Z99.2','T82','Z49','I77.0','I87.1'],show:['N18.6','Z99.2','T82.858A','T82.868A'],note:''},
+ {codes:'37220–37299, 37184–37186',name:'LE revascularization / thrombectomy (incl. 2026 codes)',re:/^37(2[2-9]\d|18[4-6])$/,pre:['I70','I74','I73','I77','T82','L97','E1','I80','I82'],show:['I70.211','I70.212','I70.221','I70.222','I74.3'],note:'2026 code-set changes – confirm the payer fee schedule is loaded; auth required.'},
+ {codes:'64490–64495, 64633–64636',name:'Facet joint injection / RF ablation',re:/^64(49[0-5]|63[3-6])$/,pre:['M47.81','M47.89','M47.2','M54.2','M54.5','M54.6','M43','M53.2','M53.8','M51.36','M51.37','M48.0','M96.1'],show:['M47.812','M47.816','M47.817','M54.50','M54.2'],note:'LCD (facet) requires axial neck/back pain of facet origin ≥3 months, failed conservative care, and ≥80% relief from diagnostic blocks before RFA. Radiculopathy codes (M54.1x) alone do not support facet procedures.'},
+ {codes:'62320–62327, 64479–64484',name:'Epidural / transforaminal steroid injection',re:/^(6232[0-7]|6447[89]|6448[0-4])$/,pre:['M54.1','M51.1','M50.1','M48.0','M47.1','M47.2','M51.2','M50.2','M96.1','M43.1','M53.1','G89','M54.4'],show:['M54.16','M54.17','M51.16','M51.17','M48.062','M54.12'],note:'Radicular pain / stenosis diagnosis required (LCD L39242). Document level, laterality and prior response.'},
+ {codes:'27096, G0260, 64451',name:'Sacroiliac joint injection / SI nerve block',re:/^(27096|G0260|64451)$/,pre:['M46.1','M53.3','M53.2','M54.5','M54.4','M53.86','M53.88','M47.818','S33.6'],show:['M46.1','M53.3','M53.2X8','M47.818'],note:'Imaging guidance is included. Use RT/LT/50 to match the side injected.'},
+ {codes:'64450, 64454, 64455, 64486–64489',name:'Peripheral nerve / plane blocks',re:/^(64450|6445[45]|6448[6-9])$/,pre:['M','G5','G89','G90','R52','S','T','Z01.81'],show:['G89.29','M25.561','M79.604','G57.91'],note:'Link the painful condition / nerve involved; genicular blocks (64454) need knee OA/pain DX (M17.x, M25.56x).'},
+ {codes:'20550–20553, 20526, 20600–20611',name:'Trigger point / tendon / joint injections',re:/^(2055[0-3]|20526|206(0[0-6]|1[01]))$/,pre:['M79.1','M62.83','M79.7','M54','M60','M65','M70','M75','M76','M77','M17','M16','M19','M25','G56','G89'],show:['M79.18','M62.830','G56.01','G56.02','M17.11','M17.12'],note:'20526 (carpal tunnel) needs G56.0x matching RT/LT. Trigger points: myofascial pain M79.1x with documented trigger points.'},
+ {codes:'62350–62370, 95990, 95991',name:'Intrathecal pump / refill',re:/^(623[5-6]\d|62370|9599[01])$/,pre:['Z45.1','Z45.4','Z97.8','G89','M96.1','G90.5','C','G35','G80','G82','R25'],show:['Z45.1','G89.4','G89.29','M96.1'],note:'Refill/reprogramming: Z45.1 + the underlying pain/spasticity condition.'},
+ {codes:'63650, 63685, 63688',name:'Spinal cord stimulator',re:/^(6365[05]|6368[58])$/,pre:['G89','M96.1','G90.5','M54.1','M51.1','G57','I73','E11.4','G62','M54.5'],show:['M96.1','G89.4','G90.522','M54.16'],note:'Requires psych evaluation and successful trial (≥50% relief) per LCD.'},
+ {codes:'80305–80307, G0480–G0483',name:'Drug testing (presumptive / definitive)',re:/^(8030[5-7]|G048[0-3])$/,pre:['Z79.891','Z79.899','Z51.81','F1','Z03.89','T40','R41','Z91.14'],show:['Z79.891','Z51.81','Z79.899'],note:'Frequency limits apply; document medical necessity (opioid therapy monitoring).'},
+ {codes:'96130–96139',name:'Psychological / neuropsych testing',re:/^961(3\d)$/,pre:['F','Z01.81','G89','R41','Z13.3','Z13.4'],show:['Z01.818','G89.4','F41.9','F32.A'],note:'Pre-procedure (SCS / pump) evaluations: Z01.818 + chronic pain G89.4.'},
+ {codes:'98925–98929',name:'Osteopathic manipulative treatment',re:/^9892[5-9]$/,pre:['M99.0'],show:['M99.01','M99.02','M99.03','M99.04'],note:'Somatic dysfunction (M99.0x) is required for each region treated; region count must match the code.'},
+ {codes:'98975–98986',name:'Remote therapeutic monitoring (RTM)',re:/^989(7[5-9]|8[0-6])$/,pre:['M','G89','J44','J45'],show:['M54.50','G89.29','M17.11'],note:'Musculoskeletal / respiratory condition monitored; supply codes require days-of-data thresholds.'},
+ {codes:'J-code drugs (J1100, J1030, J1040, J3301, J0702, J2001 …)',name:'Injectable drugs',re:/^J\d{4}$/,noDx:true,show:[],note:'Use the same DX as the injection procedure. Many plans (BCBS) require the 11-digit NDC (N4 qualifier) + unit and quantity on drug lines – missing NDC → CO-16.'},
+ {codes:'99152, 99153, 76937, 76942, 77002, 77003, 77012, 72275, 36573, 36015',name:'Sedation / imaging guidance / catheter',re:/^(9915[23]|76937|76942|7700[23]|77012|72275|36573|36015)$/,noDx:true,show:[],note:'Use the same DX as the primary procedure / per procedure note.'},
+ {codes:'G8xxx, G9xxx, xxxxF',name:'Quality reporting codes',re:/^(G[89]\d{3}|\d{4}F)$/,noDx:true,show:[],note:'No DX linkage needed. Report at $0.00/$0.01; IEHP rejects with CO-16/M51.'}
+];
+const VALID3=['I10','R55','R42','R51','R52','R54','R69','R05','I64','J45','N19','I78'];
+const LAT=[[/^I83\.8[19]([1239])$/,{1:'R',2:'L',3:'B'}],[/^I83\.0([123])\d$/,{1:'R',2:'L'}],[/^I70\.2[1-6]([1238])$/,{1:'R',2:'L',3:'B'}],[/^I65\.2([123])$/,{1:'R',2:'L',3:'B'}],[/^I82\.4\d([123])$/,{1:'R',2:'L',3:'B'}],[/^M79\.60([45])$/,{4:'R',5:'L'}],[/^M79\.66([12])$/,{1:'R',2:'L'}],[/^G56\.0([123])$/,{1:'R',2:'L',3:'B'}],[/^M17\.1([12])$/,{1:'R',2:'L'}],[/^M25\.56([12])$/,{1:'R',2:'L'}]];
+
+/* ===== helpers ===== */
+const $=s=>document.querySelector(s);
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function num(v){if(v==null||v==='')return null;if(typeof v==='number')return isFinite(v)?v:null;let s=String(v).trim();if(!s||s==='-'||/^n\/?a$/i.test(s))return null;let neg=/^\(.*\)$/.test(s)||/^-/.test(s)||/\$-/.test(s);s=s.replace(/[^0-9.]/g,'');if(!s)return null;const n=parseFloat(s);return isFinite(n)?(neg?-n:n):null}
+const money=v=>v==null||v===''?'':(v<0?'-$':'$')+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+function loadScript(u){if(loadScript.c[u])return loadScript.c[u];loadScript.c[u]=new Promise((res,rej)=>{const s=document.createElement('script');s.src=u;s.onload=()=>res();s.onerror=()=>{delete loadScript.c[u];rej(new Error('Could not load '+u.split('/').pop()+' – an internet connection is needed for this file type.'))};document.head.appendChild(s)});return loadScript.c[u]}
+loadScript.c={};
+const isQuality=c=>/^(G[89]\d{3}|\d{4}F)$/.test(c||'');
+function normCpt(c){return String(c||'').toUpperCase().replace(/^HC:/,'').replace(/\s+/g,'').trim()}
+function parseDx(s){if(!s)return[];const t=String(s).toUpperCase();if(/NOT SHOWN|NONE ON/.test(t)&&!/[A-Z]\d\d\.\w/.test(t))return[];const out=[];const re=/\b([A-TV-Z][0-9][0-9A-Z])(?:\.?([0-9A-Z]{1,4}))?\b/g;let m;while((m=re.exec(t))){const code=m[2]?m[1]+'.'+m[2]:m[1];if(/^[A-Z]\d{2}$/.test(m[1])||m[2]){if(!out.includes(code))out.push(code)}}return out}
+const dxDesc=c=>D[c]||'';
+
+/* ===== engine ===== */
+function getCodes(l){
+  const txt=((l.adj||'')+' '+(l.rarc||'')).toUpperCase();const res=[],seen=new Set();
+  const add=(k,o)=>{if(!seen.has(k)){seen.add(k);res.push(o)}};let m;
+  const reC=/\b(CO|PR|OA|PI|CR|RC)\s*[-:]?\s*([A-Z]?\d{1,3})\b/g;
+  while((m=reC.exec(txt))){const g=m[1],c=m[2],d=CARC[c];add(g+'-'+c,Object.assign({code:g+'-'+c,group:g,kind:'CARC'},d||{m:'Adjustment reason '+c+' – see the payer glossary',sev:g==='PR'?'pr':'deny',fix:'Look up CARC '+c+' in the EOB glossary.'}))}
+  const reR=/\b(MA\d{2,3}|M\d{1,3}|N\d{1,3})\b/g;
+  while((m=reR.exec(txt))){const c=m[1],d=RARC[c];add(c,Object.assign({code:c,kind:'RARC'},d||{m:'Remark '+c+' – see the payer glossary',sev:'info',fix:'Review remark '+c+' on the EOB.'}))}
+  const who=(l.payer||'')+' '+(l.src||'');
+  for(const c in PAYER){const d=PAYER[c];if(d.payer&&!d.payer.test(who))continue;if(new RegExp('(^|[^A-Z0-9-])'+c+'([^A-Z0-9]|$)').test(txt))add('P:'+c,Object.assign({code:c,kind:'Payer code'},d))}
+  return res;
+}
+function findXW(c){c=normCpt(c);return XW.find(x=>x.re.test(c))}
+function side(dx){for(const [re,map] of LAT){const m=dx.match(re);if(m)return map[m[1]]||null}return null}
+function dxCheck(l){
+  const cpt=normCpt(l.cpt);const xw=findXW(cpt);const raw=l.dxUser!=null&&l.dxUser!==''?l.dxUser:l.dx;const list=parseDx(raw);
+  if(!cpt||/claim-level/i.test(l.cpt||''))return{state:'na',msg:'No CPT on this document line – pull the claim from the PM system.',suggest:[]};
+  if(!xw)return{state:'na',msg:'No crosswalk rule for '+cpt+' – link the DX documented in the procedure note.',suggest:[]};
+  if(xw.noDx)return{state:'na',msg:xw.note,suggest:[]};
+  if(!list.length)return{state:'missing',msg:'Billed DX is not shown on this document. Enter the billed DX below to validate it.',suggest:xw.show,fix:'Confirm in the PM system that '+cpt+' points to a supporting DX, e.g. '+xw.show.slice(0,4).join(', ')+'.'};
+  const bad=list.filter(d=>!/^[A-TV-Z][0-9][0-9A-Z](\.[0-9A-Z]{1,4})?$/.test(d));
+  const ok=xw.any?list.filter(d=>!xw.bad.some(p=>d.startsWith(p))):list.filter(d=>xw.pre.some(p=>d.startsWith(p)));
+  const notes=[];
+  const mod=(l.mod||'').toUpperCase();const sides=list.map(side).filter(Boolean);
+  if(sides.length&&/\b(RT|LT|50)\b/.test(mod)){const want=/\bRT\b/.test(mod)?'R':/\bLT\b/.test(mod)?'L':'B';
+    const fits=want==='B'?(sides.includes('B')||(sides.includes('R')&&sides.includes('L'))):(sides.includes(want)||sides.includes('B'));
+    if(!fits)return{state:'lat',msg:'Laterality conflict: modifier '+(want==='R'?'RT':want==='L'?'LT':'50')+' but the DX is '+(sides.includes('R')?'right':'')+(sides.includes('L')?' left':'')+(sides.includes('B')?' bilateral':'')+'-sided.',suggest:xw.show,fix:'Change the DX (or modifier) so the side matches, then send a corrected claim.'}}
+  const short=list.filter(d=>/^[A-Z]\d{2}$/.test(d)&&!VALID3.includes(d));
+  if(short.length)notes.push(short.join(', ')+' may need more characters (code to highest specificity).');
+  if(bad.length)return{state:'invalid',msg:'Invalid ICD-10 format: '+bad.join(', '),suggest:xw.show,fix:'Correct the ICD-10 code format.'};
+  if(!ok.length)return{state:'mismatch',msg:'None of the billed DX ('+list.join(', ')+') supports '+cpt+' ('+xw.name+').',suggest:xw.show,fix:'Re-link '+cpt+' to a documented supporting DX (e.g. '+xw.show.slice(0,4).join(', ')+') and send a corrected claim (freq 7).'};
+  if(ok[0]!==list[0]&&!xw.any)notes.push('First DX ('+list[0]+') does not support '+cpt+' – point to '+ok[0]+' first.');
+  return{state:notes.length?'warn':'ok',msg:(notes.length?notes.join(' '):'Billed DX '+ok.join(', ')+' supports '+cpt+'.'),suggest:notes.length?xw.show:[],fix:notes.length?'Adjust DX pointer order/specificity on the corrected claim.':''};
+}
+function analyze(l){
+  const issues=getCodes(l);const dx=dxCheck(l);const billed=num(l.billed),paid=num(l.paid);
+  let status=l.rvStatus;
+  if(!status){const deny=issues.some(i=>i.sev==='deny');
+    if(billed!=null&&billed<0)status='Reversal';
+    else if(isQuality(normCpt(l.cpt))&&!issues.some(i=>i.sev==='deny'&&!/204|246/.test(i.code)))status='Reporting Code';
+    else if(paid>0)status=deny?'Partially Denied':'Paid';
+    else if(deny)status='Denied';
+    else if(issues.some(i=>i.sev==='cob'||i.sev==='pr'))status='Reduced-Zero Pay (COB/Ded)';
+    else if(paid===0)status='Zero Pay – review';
+    else status='Needs review';}
+  const dxRel=issues.some(i=>i.dx)||/^DX-RELATED/i.test(l.rvFinding||'')||dx.state==='mismatch'||dx.state==='lat'||dx.state==='invalid';
+  return{issues,dx,status,dxRel};
+}
+function statusPill(s){const cls=/denied/i.test(s)?'p-red':/paid$/i.test(s)&&!/zero/i.test(s)?'p-grn':/reporting/i.test(s)?'p-gry':'p-amb';return'<span class="pill '+cls+'">'+esc(s)+'</span>'}
+function dxBadge(a){if(a.dxRel)return'<span class="pill p-red">DX issue</span>';if(a.dx.state==='missing')return'<span class="pill p-amb">Verify DX</span>';if(a.dx.state==='ok')return'<span class="pill p-grn">OK</span>';if(a.dx.state==='warn')return'<span class="pill p-amb">Check order</span>';return'<span class="muted">—</span>'}
+function deadline(p){p=(p||'').toLowerCase();
+  if(/noridian|medicare/.test(p)&&!/advantage/.test(p))return'Medicare (Noridian): redetermination within 120 days of the remit date. Lines with N704 are fixed with a corrected/new claim, not an appeal.';
+  if(/hartford|comp/.test(p))return'Workers\' comp (CA): request second bill review within 90 days of the EOR, then IBR.';
+  if(/medi-?cal|medicaid|iehp|inland|caloptima|molina|health net|wellcare|optum|physicians health|prospect|regal|providence/.test(p))return'Medi-Cal managed care / IPA: provider dispute (PDR) generally within 365 days of the determination (Medicare Advantage lines: per contract, often 60–120 days).';
+  return'Commercial: check the provider contract – appeals are commonly due within 90–180 days.'}
+
+/* ===== state ===== */
+let LINES=[];let SEQ=0;
+const sig=l=>[l.src,l.icn,l.acct,l.patient,l.dosFrom,normCpt(l.cpt),l.mod,num(l.billed),num(l.paid)].join('|').toUpperCase();
+const claimKey=l=>(l.src||'')+'|'+(l.icn||l.acct||((l.patient||'')+'#'+(l.dosFrom||'')));
+function addLines(arr,origin){const have=new Set(LINES.map(sig));let n=0;for(const o of arr){const l=Object.assign({},o);COLS.forEach(k=>{if(l[k]==null)l[k]=''});['billed','allowed','paid','ptResp'].forEach(k=>{l[k]=num(l[k])});const nc=normCpt(l.cpt);if(/^[A-Z0-9]{5}$/.test(nc))l.cpt=nc;const s=sig(l);if(have.has(s))continue;have.add(s);l.id=++SEQ;l.origin=l.origin||origin||'upload';LINES.push(l);n++}return n}
+function loadBatch(){const arr=BATCH.map(r=>{const o={};COLS.forEach((k,i)=>o[k]=r[i]==null?'':r[i]);o.origin='batch';return o});return addLines(arr,'batch')}
+
+/* ===== grid ===== */
+function fillSelect(sel,label,vals,keep){const cur=keep?sel.value:'';sel.innerHTML='<option value="">'+label+'</option>'+vals.map(v=>'<option'+(v===cur?' selected':'')+'>'+esc(v)+'</option>').join('')}
+function refreshFilters(){const u=k=>[...new Set(LINES.map(k).filter(Boolean))].sort();fillSelect($('#fStatus'),'All statuses',u(l=>analyze(l).status),true);fillSelect($('#fPayer'),'All payers',u(l=>l.payer),true);fillSelect($('#fSrc'),'All source files',u(l=>l.src),true)}
+function filtered(){const q=$('#fq').value.trim().toLowerCase(),st=$('#fStatus').value,py=$('#fPayer').value,sr=$('#fSrc').value,dxo=$('#fDx').checked,op=$('#fOpen').checked;
+  return LINES.filter(l=>{const a=analyze(l);if(st&&a.status!==st)return false;if(py&&l.payer!==py)return false;if(sr&&l.src!==sr)return false;if(dxo&&!a.dxRel)return false;if(op&&!/denied|pending|review/i.test(a.status))return false;
+    if(q){const hay=COLS.map(k=>l[k]).join(' ').toLowerCase()+' '+(l.dxUser||'');if(!hay.includes(q))return false}return true})}
+function render(){
+  const rows=filtered();const tb=$('#grid tbody');
+  if(!LINES.length){tb.innerHTML='<tr><td colspan="12" class="empty">No claims loaded. Upload EOB files above or reload the October 2026 review batch.</td></tr>'}
+  else if(!rows.length){tb.innerHTML='<tr><td colspan="12" class="empty">No lines match the filters.</td></tr>'}
+  else tb.innerHTML=rows.map(l=>{const a=analyze(l);const dxs=l.dxUser||(/not shown|none on/i.test(l.dx)?'':l.dx);const codes=[l.adj,l.rarc].filter(Boolean).join(' · ');
+    return'<tr data-id="'+l.id+'"><td>'+statusPill(a.status)+'</td><td>'+esc(l.patient)+'</td><td style="white-space:nowrap">'+esc(l.dosFrom)+(l.dosTo&&l.dosTo!==l.dosFrom?' – '+esc(l.dosTo):'')+'</td><td class="cpt">'+esc(l.cpt)+'</td><td>'+esc(l.mod)+'</td><td><span class="icd">'+esc(dxs)+'</span></td><td class="num">'+money(l.billed)+'</td><td class="num">'+money(l.paid)+'</td><td class="codes">'+esc(codes.length>90?codes.slice(0,90)+'…':codes)+'</td><td>'+dxBadge(a)+'</td><td>'+esc(l.payer)+'</td><td class="small muted">'+esc(l.src)+'</td></tr>'}).join('');
+  const sum=(arr,k)=>arr.reduce((t,l)=>t+(num(l[k])||0),0);const an=rows.map(l=>[l,analyze(l)]);
+  const den=an.filter(([,a])=>/denied/i.test(a.status));const claims=new Set(rows.map(claimKey)).size;
+  $('#kpis').innerHTML=[['Lines',rows.length],['Claims',claims],['Billed',money(sum(rows,'billed'))],['Paid',money(sum(rows,'paid'))],['Denied lines',den.length],['Denied $ (billed)',money(den.reduce((t,[l])=>t+(num(l.billed)||0),0))],['DX-issue lines',an.filter(([,a])=>a.dxRel).length]].map(([k,v])=>'<div class="kpi"><b>'+v+'</b><span>'+k+'</span></div>').join('');
+  $('#count').textContent=rows.length+' of '+LINES.length+' lines shown · click a row to see the claim issues and how to resolve them.';
+  renderSummary();
+}
+
+/* ===== drawer ===== */
+let OPEN=null;
+function openClaim(id){const l=LINES.find(x=>x.id===id);if(!l)return;OPEN=id;const key=claimKey(l);const lines=LINES.filter(x=>claimKey(x)===key);
+  const steps=[];const addS=s=>{if(s&&!steps.includes(s))steps.push(s)};
+  const cards=lines.map(x=>{const a=analyze(x);
+    const act=a.issues.filter(i=>i.sev!=='info'),info=a.issues.filter(i=>i.sev==='info');
+    const issueHtml=act.length?act.map(i=>'<div class="issue '+(i.dx?'dx':i.sev)+'"><code>'+esc(i.code)+'</code> <span class="small muted">'+esc(i.kind)+(i.group?' · '+esc(GROUP[i.group]||''):'')+'</span>'+(i.dx?' <span class="pill p-red">DX-related</span>':'')+'<div>'+esc(i.m)+'</div><div class="fix"><b>Fix:</b> '+esc(i.fix)+'</div></div>').join(''):(x.rvReason&&x.rvReason!=='—'?'<div class="issue deny"><div>'+esc(x.rvReason)+'</div></div>':'<div class="muted small">No denial codes on this line.</div>');
+    const infoHtml=info.length?'<details><summary>'+info.length+' informational code(s)</summary>'+info.map(i=>'<div class="issue info"><code>'+esc(i.code)+'</code> '+esc(i.m)+' <span class="muted small">– '+esc(i.fix)+'</span></div>').join('')+'</details>':'';
+    const d=a.dx;const bcls={ok:'b-grn',warn:'b-amb',missing:'b-amb',mismatch:'b-red',lat:'b-red',invalid:'b-red',na:'b-gry'}[d.state];
+    const sug=d.suggest&&d.suggest.length?'<div class="small" style="margin-top:4px">Supporting DX for '+esc(x.cpt)+' (click to add):<br>'+d.suggest.map(c=>'<span class="chip" data-add="'+esc(c)+'" data-line="'+x.id+'" title="'+esc(dxDesc(c))+'"><span class="icd">'+esc(c)+'</span> '+esc(dxDesc(c))+'</span>').join('')+'</div>':'';
+    // steps
+    a.issues.filter(i=>i.dx).forEach(i=>addS(x.cpt+': '+i.fix));
+    if(d.fix&&(a.dxRel||d.state==='warn'))addS(x.cpt+': '+d.fix);
+    a.issues.filter(i=>i.sev==='deny'&&!i.dx).forEach(i=>addS(x.cpt+' ('+i.code+'): '+i.fix));
+    a.issues.filter(i=>i.sev==='cob').forEach(i=>addS(x.cpt+' ('+i.code+'): '+i.fix));
+    a.issues.filter(i=>i.sev==='pr').forEach(i=>addS(x.cpt+' ('+i.code+'): '+i.fix));
+    if(x.rvAction&&/denied|pending|zero|review/i.test(a.status))addS(x.cpt+' – reviewer: '+x.rvAction);
+    if(d.state==='missing'&&/denied/i.test(a.status)&&!a.dxRel)addS(x.cpt+': '+d.fix);
+    const rv=(x.rvFinding||x.rvDx||x.rvAction)?'<h4>Reviewer finding (Oct-2026 review)</h4><div class="rv">'+(x.rvFinding?'<div><b>Finding:</b> '+esc(x.rvFinding)+'</div>':'')+(x.rvDx?'<div><b>DX to link:</b> '+esc(x.rvDx)+'</div>':'')+(x.rvAction?'<div><b>Action:</b> '+esc(x.rvAction)+'</div>':'')+'</div>':'';
+    return'<div class="card'+(x.id===id?' sel':'')+'" id="card-'+x.id+'"><div class="ch"><span><span class="cpt">'+esc(x.cpt)+'</span> '+esc(x.mod)+' · '+esc(x.dosFrom)+(x.units?' · '+esc(x.units)+' unit(s)':'')+' · '+money(x.billed)+' billed → '+money(x.paid)+' paid</span>'+statusPill(a.status)+'</div>'+
+      '<h4>Claim issues</h4>'+issueHtml+infoHtml+
+      '<h4>DX linkage check</h4><div class="banner '+bcls+'">'+esc(d.msg)+'</div>'+
+      '<div class="dxrow"><input type="text" id="dx-'+x.id+'" value="'+esc(x.dxUser!=null&&x.dxUser!==''?x.dxUser:(parseDx(x.dx).join(', ')))+'" placeholder="Billed DX codes, e.g. I83.812, I87.2" aria-label="Billed DX"><button class="btn sm" data-check="'+x.id+'" type="button">Re-check DX</button></div>'+sug+rv+
+      (x.raw?'<details><summary>Source text</summary><pre>'+esc(x.raw)+'</pre></details>':'')+
+      '<h4>Notes</h4><textarea data-note="'+x.id+'" placeholder="Work notes (included in export)">'+esc(x.note||'')+'</textarea>'+
+      '<div style="margin-top:6px"><button class="btn sm" data-del="'+x.id+'" type="button">Remove line</button></div></div>'});
+  if(!steps.length)addS('No action needed – lines paid / informational only.');
+  const m=[['Member ID',l.memberId],['Pt Acct #',l.acct],['Payer claim # / ICN',l.icn],['Check / EFT #',l.check],['Check date',l.checkDate],['Claim status (EOB)',l.claimStatus],['DX on EOB',l.dx],['Source file',l.src]];
+  const tot=lines.reduce((t,x)=>[t[0]+(num(x.billed)||0),t[1]+(num(x.paid)||0)],[0,0]);
+  $('#drawer').innerHTML='<div class="dh"><div><h2>'+esc(l.patient||'Unknown patient')+'</h2><div class="muted small">'+esc(l.payer)+' · '+lines.length+' line(s) · '+money(tot[0])+' billed / '+money(tot[1])+' paid</div></div><div style="display:flex;gap:6px;align-items:start"><button class="btn sm" id="dCopy" type="button">Copy resolution</button><button class="btn sm" id="dExp" type="button">Export claim</button><button class="btn sm" id="dClose" type="button" aria-label="Close">✕</button></div></div>'+
+   '<div class="db"><div class="meta">'+m.map(([k,v])=>'<div><span>'+k+'</span>'+esc(v||'—')+'</div>').join('')+'</div>'+
+   '<h3>How to resolve this claim</h3><ol class="steps">'+steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'<li class="muted">'+esc(deadline(l.payer+' '+l.src))+'</li></ol>'+
+   '<h3>Service lines</h3>'+cards.join('')+'</div>';
+  $('#drawer').dataset.steps=JSON.stringify(steps.concat([deadline(l.payer+' '+l.src)]));
+  $('#drawer').hidden=false;$('#scrim').hidden=false;
+  const sel=document.getElementById('card-'+id);if(sel&&lines.length>1)sel.scrollIntoView({block:'start'});
+}
+function closeDrawer(){$('#drawer').hidden=true;$('#scrim').hidden=true;OPEN=null}
+
+/* ===== export ===== */
+function exportRows(list){return list.map(l=>{const a=analyze(l);const o={};COLS.forEach(k=>o[HEAD[k]]=l[k]);
+  o['Workbench Status']=a.status;o['DX Issue?']=a.dxRel?'Yes':'No';
+  o['Claim Issues']=a.issues.filter(i=>i.sev!=='info').map(i=>i.code+': '+i.m).join(' | ');
+  o['DX Check']=a.dx.msg;o['Suggested DX']=(a.dx.suggest||[]).join(', ');
+  o['How to Resolve']=[...new Set(a.issues.filter(i=>i.sev!=='info').map(i=>i.fix).concat(a.dx.fix&&(a.dxRel||a.dx.state==='warn')?[a.dx.fix]:[]))].join(' | ');
+  o['Billed DX (entered)']=l.dxUser||'';o['Notes']=l.note||'';o['Billing System']=l.system||'';return o})}
+function toCSV(rows){if(!rows.length)return'';const h=Object.keys(rows[0]);const q=v=>{v=v==null?'':String(v);return/[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};return[h.map(q).join(',')].concat(rows.map(r=>h.map(k=>q(r[k])).join(','))).join('\r\n')}
+function download(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+const stamp=()=>new Date().toISOString().slice(0,10);
+function exportCSV(list,name){const rows=exportRows(list);if(!rows.length){alert('Nothing to export.');return}download((name||'Denial_Workbench_Results_'+stamp())+'.csv',new Blob(['﻿'+toCSV(rows)],{type:'text/csv;charset=utf-8'}))}
+async function exportXLSX(list){const rows=exportRows(list);if(!rows.length){alert('Nothing to export.');return}
+  try{await loadScript(LIB.xlsx);const wb=XLSX.utils.book_new();const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=Object.keys(rows[0]).map(k=>({wch:Math.min(48,Math.max(10,k.length+2))}));ws['!autofilter']={ref:ws['!ref']};XLSX.utils.book_append_sheet(wb,ws,'Results');
+    const den=rows.filter(r=>/denied|pending|review/i.test(r['Workbench Status']));if(den.length){const w2=XLSX.utils.json_to_sheet(den);w2['!cols']=ws['!cols'];XLSX.utils.book_append_sheet(wb,w2,'Open Denials')}
+    const dxr=rows.filter(r=>r['DX Issue?']==='Yes');if(dxr.length){const w3=XLSX.utils.json_to_sheet(dxr);w3['!cols']=ws['!cols'];XLSX.utils.book_append_sheet(wb,w3,'DX Issues')}
+    const sd=summaryData(list);[['Summary by File',sd.fileRows],['Summary by Payer',sd.payerRows],['Summary by Status',sd.statusRows],['Denial Reasons',sd.reasonRows]].forEach(([nm,rs])=>{if(rs.length){const w=XLSX.utils.json_to_sheet(rs);w['!cols']=Object.keys(rs[0]).map(k=>({wch:Math.min(60,Math.max(12,k.length+2))}));XLSX.utils.book_append_sheet(wb,w,nm)}});
+    if(wb.SheetNames.length>1){const s=wb.SheetNames.splice(wb.SheetNames.indexOf('Summary by File'),1);if(s.length)wb.SheetNames.unshift(s[0])}
+    XLSX.writeFile(wb,'Denial_Workbench_Results_'+stamp()+'.xlsx')}
+  catch(e){alert(e.message+'\nExporting CSV instead.');exportCSV(list)}}
+
+/* ===== upload / parsing ===== */
+const SYN={patient:['patient name','patient','pt name','member name','name','patient full name','insured name'],dosFrom:['dos from','dos','date of service','service date','from date','begin service date','svc date','from dos','service from','dos (from)'],dosTo:['dos to','to date','end service date','thru date','service to','to dos','end date'],cpt:['cpt/hcpcs','cpt','hcpcs','procedure code','proc code','procedure','proc','cpt code','service code','serv code','proc/rev code','proc/rev code, mods','cpt/hcpc','code'],mod:['modifier(s)','modifiers','modifier','mod','mods'],units:['units','unit','qty','paid units','days/units'],dx:['dx on eob','dx','diagnosis','diagnosis code','diagnosis codes','icd','icd-10','icd10','dx codes','diag','dx code','icd codes'],billed:['billed','billed amount','billed amt','charge','charges','charge amount','total charge','amount billed','submitted','billed charges'],allowed:['allowed','allowed amount','allowed amt','allowable'],paid:['paid','paid amount','provider paid','paid amt','payment','net paid','prov pd','insurance paid','amount paid','payment amount'],ptResp:['pt resp','patient resp','patient responsibility','pr amount','pt responsibility'],adj:['adj / denial codes','adjustment codes','adj codes','adjust codes','carc','denial code','denial codes','reason code','reason codes','adjustment reason','group/carc','claim adj codes','adjustment code','denial reason code'],rarc:['remark codes','remark code','rarc','remarks','remark'],payer:['payer','insurance','payer name','carrier','plan','insurance name'],memberId:['member id','member #','subscriber id','insurance id','policy #','hic','medicaid id','member number'],acct:['pt acct #','patient account','account #','acct #','account number','patient account number','provider claim id','acct','account'],icn:['payer claim # / icn','icn','claim #','claim number','claim id','payer claim id','payer claim #','claim no','tcn'],check:['check/eft #','check #','eft #','check number','eft','reference id','check no'],checkDate:['check date','payment date','paid date','remit date'],claimStatus:['claim status (eob)','claim status','status'],src:['source file'],rvStatus:['line status'],rvReason:['denial reason (plain english)','denial reason'],rvFinding:['dx linkage finding'],rvDx:['dx to link (verify vs chart)','dx to link'],rvAction:['action / next step','action','next step']};
+/* extra export-column names used by PM / EHR payment & ERA exports (AdvancedMD, athena, Tebra, DrChrono, NextGen, Epic, WebPT, TherapyNotes, Brightree …) */
+(function(){const add={patient:['patient name (last, first)','patient (last, first)','client name','pt full name','patient/member'],dosFrom:['svc date','svc dt','date of svc','service dt','visit date','encounter date','appointment date','dos (from)','from date of service','start date'],dosTo:['svc thru','service thru','end date of service','to date of service'],
+  cpt:['cpt4','cpt code','procedure code','hcpcs code','item code','billing code','charge code','service code','cpt/hcpcs code','proc','procedure/hcpcs'],mod:['mod 1','modifier 1','mod1','modifiers 1-4'],units:['units billed','qty billed','service units','billed units','quantity'],
+  billed:['charge amount','chg amt','fee','billed charge','line charge','charges billed','total charges','billed amt'],allowed:['allowed amt','approved amount','allowed charge','expected'],
+  paid:['ins paid','insurance paid','payer paid','insurance payment','pmt amt','payment amount','paid amt','primary paid','ins payment'],ptResp:['patient responsibility amount','pt resp amt','patient portion','patient balance'],
+  adj:['adj reason','adjustment reason codes','claim adjustment reason code','kick code','kick reason','kick codes','denial reason','reject reason','carc/rarc','adjustment codes (group-reason)'],rarc:['remit remark','remark codes (rarc)','remit codes'],
+  icn:['payer claim number','claim control number','icn/dcn','payer icn','original claim #','payer claim id','payer reference #'],acct:['claim id','encounter id','visit id','chart #','mrn','account no','patient account #'],
+  payer:['payer name','insurance company','primary insurance','carrier name','insurance plan'],check:['check #','eft #','check/eft number','trace #','payment reference'],checkDate:['deposit date','check/eft date','posting date','payment date']};
+  for(const k in add)SYN[k]=(SYN[k]||[]).concat(add[k].filter(x=>!(SYN[k]||[]).includes(x)))})();
+const nh=s=>String(s||'').toLowerCase().replace(/\s+/g,' ').replace(/[:*]/g,'').trim();
+function mapHeader(row){const map={};const used=new Set();const cells=row.map(nh);
+  for(const f in SYN){for(const syn of SYN[f]){const i=cells.findIndex((c,ix)=>c===syn&&!used.has(ix));if(i>=0){map[f]=i;used.add(i);break}}}
+  for(const f in SYN){if(map[f]!=null)continue;for(const syn of SYN[f]){if(syn.length<5)continue;const i=cells.findIndex((c,ix)=>!used.has(ix)&&c.startsWith(syn));if(i>=0){map[f]=i;used.add(i);break}}}
+  return map}
+function parseTable(rows,src){const out=[];if(!rows||!rows.length)return out;let hi=-1,map=null;
+  for(let r=0;r<Math.min(rows.length,25);r++){const m=mapHeader(rows[r]||[]);if(m.cpt!=null&&(m.patient!=null||m.billed!=null||m.paid!=null)&&Object.keys(m).length>=3){hi=r;map=m;break}}
+  if(hi<0)return out;
+  for(let r=hi+1;r<rows.length;r++){const row=rows[r]||[];const g=f=>map[f]!=null?String(row[map[f]]==null?'':row[map[f]]).trim():'';
+    const cpt=g('cpt'),pt=g('patient');if(!cpt&&!pt)continue;if(/^(total|totals|grand total|subtotal)/i.test(pt)||/^total/i.test(cpt))continue;
+    const o={};COLS.forEach(k=>o[k]=g(k));if(!o.src)o.src=src;if(!o.dosTo)o.dosTo=o.dosFrom;o.raw=row.filter(v=>v!==''&&v!=null).join(' | ');out.push(o)}
+  return out}
+function parseCSV(t){const rows=[];let row=[],f='',q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}else{if(c==='"')q=true;else if(c===','){row.push(f);f=''}else if(c==='\n'){row.push(f);rows.push(row);row=[];f=''}else if(c!=='\r')f+=c}}if(f!==''||row.length){row.push(f);rows.push(row)}return rows}
+const PAYERS=[[/noridian/i,'Noridian (Medicare)'],[/humana/i,'Humana'],[/inland empire|\biehp\b/i,'IEHP'],[/caloptima/i,'CalOptima'],[/medicaid of california|medi-cal/i,'Medi-Cal'],[/aetna/i,'Aetna'],[/united\s*health|\buhc\b/i,'UnitedHealthcare'],[/blue cross|anthem/i,'Anthem Blue Cross'],[/blue shield/i,'Blue Shield'],[/molina/i,'Molina'],[/wellcare/i,'Wellcare'],[/health net/i,'Health Net'],[/optum|monarch/i,'Optum'],[/hartford/i,'The Hartford (WC)'],[/prospect/i,'Prospect Medical'],[/regal/i,'Regal Medical Group'],[/physicians health network/i,'Physicians Health Network'],[/cigna/i,'Cigna'],[/scan health/i,'SCAN'],[/kaiser/i,'Kaiser']];
+const detectPayer=t=>{const lab=t.match(/^\s*PAY(?:ER|OR)(?:\s*NAME)?\s*:\s*([A-Za-z][^\n(]{2,80})/im);if(lab)return lab[1].replace(/\s{2,}.*/,'').replace(/\(.*$/,'').trim();for(const [re,n] of PAYERS)if(re.test(t))return n;const m=t.match(/(?:Payer|Payor)\s*:?\s*([A-Z][A-Za-z .,&-]{3,40})/);return m?m[1].trim():''};
+const MODS=new Set(['25','26','59','XU','XS','XE','XP','RT','LT','50','TC','93','95','GT','QW','JZ','JW','76','77','91','GA','GY','GZ','KX','24','57','58','78','79','80','82','AS','SA','GC','Q5','Q6','CR','LM','RC','LC','LD','74','73','52','53','22','62','51','27','33','FQ','FR','GQ','QX','QZ','AI','23','47','54','55','56','63','66','81','90','92','96','97','99']);
+function cleanName(s){return s.split(/\s{2,}|\s(?=(?:Medicaid|Medicare|Member|Insured|Patient ID|Patient Account|Recipient|Subscriber|HIC|ID\b|Acct|Account|DOB|Claim|Provider|Rendering|ACNT|ICN)\b)/i)[0].replace(/[^A-Za-z ,.'-]/g,'').trim()}
+function parseServiceLine(L){
+  if(/\btotals?\b|^\s*service line totals/i.test(L))return null;
+  const s=L.replace(/HC:/gi,' ').replace(/\s+/g,' ');
+  const moneyRe=/(?:^|[\s(])(-?\$?\s?-?\d{1,3}(?:,\d{3})*\.\d{2})(?=$|[\s),])/g;
+  const vals=[];let m;while((m=moneyRe.exec(s)))vals.push({v:num(m[1]),i:m.index});
+  if(!vals.length)return null;
+  const D8=/\b(20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\b/g;
+  const dates=[...s.matchAll(/\b(\d{1,2}\/\d{1,2}\/\d{2,4}|\d{4}-\d{2}-\d{2}|20\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01]))\b/g)].map(x=>d8(x[1]));
+  if(!dates.length&&vals.length<2)return null;
+  const t=s.replace(/\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/g,' ').replace(D8,' ').replace(/-?\$?\s?-?\d{1,3}(?:,\d{3})*\.\d{2}\b/g,' ');
+  const MODALT=[...MODS].join('|');
+  const re=new RegExp('(?:^|[\\s|,;(])(\\d{4}[0-9FTU]|[A-V]\\d{4})((?:'+MODALT+'){0,4})(?=$|[\\s|,;:)\\-])','g');let c,cpt=null,ci=-1,glued=[];
+  while((c=re.exec(t))){const k=c[1];if(/^\d{5}$/.test(k)){const n=+k;if(n<100||n>99607)continue;if(/\b(CA|NY|TX|ND|KY|CT|FL|AZ|NV|OR|WA|IL|PA|OH|GA|NJ|MA)\s*$/.test(t.slice(Math.max(0,c.index-4),c.index+1)))continue}cpt=k;glued=(c[2].match(/.{2}/g)||[]);ci=c.index+c[0].indexOf(k)+(c[2]||'').length;break}
+  if(!cpt)return null;
+  const after=t.slice(ci+cpt.length).replace(/^[\s:\-]+/,'');const mods=glued.slice();for(const tok of after.split(/[\s:\-,]+/)){if(MODS.has(tok)&&mods.length<4)mods.push(tok);else break}
+  const carcPos=s.search(/\b(CO|PR|OA|PI|CR)\s*[-:]?\s*[A-Z]?\d{1,3}\b/);
+  const before=carcPos>=0?vals.filter(x=>x.i<carcPos):vals;
+  let billed=vals[0].v,allowed=null,paid=null;
+  if(/\$/.test(s)){paid=vals.length>1?vals[vals.length-1].v:null;allowed=vals.length>2?vals[1].v:null}
+  else{if(before.length>=3){allowed=before[1].v;paid=before[2].v}else if(before.length===2){paid=before[1].v}}
+  const codes=[];const cr=/\b(CO|PR|OA|PI|CR)\s*[-:]?\s*([A-Z]?\d{1,3})\b/g;while((m=cr.exec(s)))codes.push(m[1]+'-'+m[2]);
+  for(const pc of Object.keys(PAYER))if(new RegExp('(^|\\s)'+pc+'(\\s|$)').test(s.toUpperCase())&&!/^\d+$/.test(pc))codes.push(pc);
+  const rr=[...new Set((s.match(/\b(MA\d{2,3}|M\d{1,3}|N\d{1,3})\b/g)||[]))];
+  return{dosFrom:dates[0]||'',dosTo:dates[1]||dates[0]||'',cpt,mod:mods.join(' '),billed,allowed,paid,adj:[...new Set(codes)].join(', '),rarc:rr.join(', '),dx:''}
+}
+/* --- Fixed-column "835 ELECTRONIC REMITTANCE SUMMARY REPORT" (YYYYMMDD PT PROC MODS NUM BILLED ...) --- */
+const d8=s=>/^\d{8}$/.test(s||'')?s.slice(4,6)+'/'+s.slice(6,8)+'/'+s.slice(0,4):(s||'');
+const isAmt=s=>/^-?\$?-?\d{1,3}(,\d{3})*\.\d{2}$|^-?\d+\.\d{2}$/.test(s);
+const isAdjCode=s=>/^(CO|PR|OA|PI|CR)[A-Z]?\d{1,3}$/.test(s);
+const isRarc=s=>/^(MA\d{2,3}|M\d{1,3}|N\d{1,3})$/.test(s);
+function parse835Report(text,src){
+  const out=[];const L0=text.split(/\r?\n/);
+  const payer=((text.match(/^\s*PAYER\s*:\s*(.+)$/im)||[])[1]||detectPayer(text)).replace(/\s{2,}.*/,'').trim();
+  const check=(text.match(/CHECK\s*(?:NUMBER|NO\.?|#)\s*:?\s*([A-Z0-9-]+)/i)||[])[1]||'';
+  const paidDt=(text.match(/\bPaid\s*:\s*(\d{8})/i)||[])[1]||'';
+  let ctx=null;
+  for(const raw of L0){const L=raw.trim();if(!L)continue;let m;
+    if((m=L.match(/^(.+?)\s+HIC\s*:\s*(\S+)\s+ICN\s*:\s*(\S+)(?:\s+ACT\s*:\s*(\S+))?/i))){ctx={patient:m[1].replace(/\s+/g,' ').trim(),memberId:m[2],icn:m[3],acct:m[4]||'',claimDate:'',from:'',thru:''};continue}
+    if(!ctx)continue;
+    if((m=L.match(/^CORRECTED\s*:\s*(\S+)/i))){ctx.memberId+=' (corrected: '+m[1]+')';continue}
+    if((m=L.match(/CLAIM DATE\s*:\s*(\d{8})?/i))&&/SVCS FROM/i.test(L)){ctx.claimDate=m[1]||'';ctx.from=(L.match(/SVCS FROM\s*:\s*(\d{8})/i)||[])[1]||'';ctx.thru=(L.match(/SVCS THRU\s*:\s*(\d{8})/i)||[])[1]||'';continue}
+    if((m=L.match(/^(\d{8})\s+(\S+)((?:\s+[A-Z0-9]{2})*)\s+(\d{3})\s+(.+)$/))){
+      const pr=splitProc(m[2]);if(!pr)continue;
+      const mods=pr.mods.concat((m[3]||'').trim().split(/\s+/).filter(Boolean));
+      const toks=m[5].trim().split(/\s+/);const before=[],codes=[],after=[],rarc=[];let seenCode=false;
+      for(const t of toks){if(isAdjCode(t)){codes.push(t);seenCode=true}else if(isRarc(t))rarc.push(t);else if(isAmt(t))(seenCode?after:before).push(num(t))}
+      let billed=before.length?before[0]:null,allowed=before.length>1?before[1]:null,paid=null,adjAmt=null,prAmts=[];
+      if(!seenCode){paid=before.length>2?before[before.length-2]:null;adjAmt=before.length>2?before[before.length-1]:null}
+      else if(after.length>=2){paid=after[after.length-2];adjAmt=after[after.length-1];prAmts=after.slice(0,after.length-2)}
+      else if(after.length===1){paid=after[0]}
+      const prCodes=codes.filter(c=>/^PR/.test(c));let pi=0;
+      const adj=codes.map(c=>{const g=c.slice(0,2),r=c.slice(2);let s=g+'-'+r;if(g==='PR'&&pi<prAmts.length)s+=' $'+prAmts[pi++].toFixed(2);return s}).join(', ')+(adjAmt!=null?' (total adj $'+adjAmt.toFixed(2)+')':'');
+      const ptResp=prCodes.length&&prAmts.length?prAmts.reduce((a,b)=>a+b,0):null;
+      out.push({src,payer,check,checkDate:d8(paidDt),patient:ctx.patient,memberId:ctx.memberId,acct:ctx.acct,icn:ctx.icn,claimStatus:ctx.claimDate?'Claim date '+d8(ctx.claimDate):'',
+        dosFrom:d8(m[1]),dosTo:d8(ctx.thru||m[1]),cpt:pr.cpt,mod:mods.join(' '),units:String(parseInt(m[4],10)),dx:'',billed,allowed,paid,ptResp,adj,rarc:rarc.join(', '),raw:L});
+    }
+  }
+  const tb=(text.match(/SUBMITTED\s*:\s*(-?[\d,]+\.\d{2})/i)||[])[1],tp=(text.match(/PAID PROVIDER\s*:\s*(-?[\d,]+\.\d{2})/i)||[])[1];
+  if(tb||tp)out.recon={billed:num(tb),paid:num(tp)};
+  return out}
+
+/* --- eClinicalWorks "eRemittance / Explanation of Payment" (Serv Date | Units | Serv Code | Billed | Paid | Allowed | Adjustments, REM: row) --- */
+const ECW_LABELS=['patient name','subscriber name','provider name','claim statement','dates','claim statement dates','patient id','payer claim id','provider claim id','received date','claim status','claim amount','paid amount','pt responsibility'];
+function ocrFix(s){s=s.replace(/\bHC\s*[.;,]\s*(?=[A-Z0-9]{4,5}\b)/g,'HC:');for(let k=0;k<3;k++)s=s.replace(/(HC:[A-Z0-9:]+)[;.]([A-Z0-9]{2})\b/g,'$1:$2');
+  return s.replace(/\bC0-(?=\d)/g,'CO-').replace(/\b0A-(?=\d)/g,'OA-').replace(/\bP R-/g,'PR-').replace(/(^|\s)[O0]HC:/g,'$1 0 HC:').replace(/(\d)(?=(?:CO|PR|OA|PI|CR)-)/g,'$1 ').replace(/(^|\s)-(?=(?:CO|PR|OA|PI|CR)-)/g,'$1- ')}
+function parseECW(text,src){
+  const out=[];const rows=text.split(/\r?\n/).map(s=>ocrFix(s.replace(/\s+/g,' ').trim())).filter(Boolean);
+  const payer=detectPayer(text)||((text.match(/eRemittance\s*-\s*([^\n]+)/i)||[])[1]||'').trim();
+  let check='';const ri=text.search(/Reference\s*ID\s*:?/i);
+  if(ri>=0){const toks=text.slice(ri).replace(/Reference\s*ID\s*:?/i,' ').split(/\s+/).slice(0,40);for(const t of toks){if(/^[A-Z0-9-]*\d[A-Z0-9-]{5,}$/i.test(t)){check=t;break}}}
+  if(!check){const st=(src||'').replace(/\.[^.]+$/,'');if(/^[A-Z0-9-]{6,}$/i.test(st))check=st}
+  const dt=(text.match(/(?:^|\s)Date\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/m)||[])[1]||'';
+  const hdrAmt=num((text.match(/(?:^|\s)Amount\s*:\s*([S$]?-?[\d,]+\.\d{2})/m)||[])[1]);
+  const claims=[];let c=null,last=null,pFrom='',pTo='',awaitTo=false,labelQ=[];
+  const newClaim=name=>{c={patient:name,memberId:'',icn:'',acct:'',prov:'',status:'',desc:'',claimAmt:null,paidAmt:null,moa:[]};claims.push(c);last=null;pFrom='';pTo='';awaitTo=false};
+  const setField=(lab,val)=>{lab=lab.toLowerCase();if(lab==='patient name'){newClaim(val);return}if(!c)return;val=(val||'').trim();if(val==='-'||val==='- - -')val='';
+    if(lab==='patient id')c.memberId=val;else if(lab==='payer claim id')c.icn=val;else if(lab==='provider claim id')c.acct=val;else if(lab==='provider name')c.prov=val;else if(lab==='claim status')c.status=val;else if(lab==='claim amount')c.claimAmt=num(val);else if(lab==='paid amount')c.paidAmt=num(val)};
+  for(const L of rows){let m;const low=L.toLowerCase().replace(/\s*:\s*$/,'');
+    // column-dump layout: labels on their own lines, values follow in the same order
+    if(ECW_LABELS.includes(low)){if(low==='dates'&&labelQ[labelQ.length-1]==='claim statement')continue;labelQ.push(low);continue}
+    if(labelQ.length&&!/HC\s*:|^REM\b|Serv\s*Date|Claim Status Description/i.test(L)){setField(labelQ.shift(),L);continue}
+    labelQ=[];
+    // row layout: "Patient Name X Patient ID Y Claim Status 2"
+    if(!/Description/i.test(L)&&(m=L.match(/Patient\s*Name\s*:?\s+(.+?)(?:\s+Patient\s*ID\s*:?\s+(\S+))?(?:\s+Claim\s*Status\s*:?\s+(\S+))?\s*$/i))){newClaim(m[1].trim());if(m[2])c.memberId=m[2];if(m[3])c.status=m[3];continue}
+    if(!c)continue;
+    if((m=L.match(/Payer\s*Claim\s*ID\s*:?\s+(\S+)/i)))c.icn=m[1];
+    if((m=L.match(/Claim\s*Amount\s*:?\s+([S$]?-?[\d,]+\.\d{2})/i)))c.claimAmt=num(m[1]);
+    if((m=L.match(/Provider\s*Name\s*:?\s+(.+?)\s+Provider\s*Claim\s*ID/i)))c.prov=m[1].trim();
+    if((m=L.match(/Provider\s*Claim\s*ID\s*:?\s+(\S+)/i)))c.acct=m[1];
+    if((m=L.match(/Paid\s*Amount\s*:?\s+([S$]?-?[\d,]+\.\d{2})/i)))c.paidAmt=num(m[1]);
+    if((m=L.match(/Claim\s*Status\s*Description\s*:?\s*(.+)$/i))){c.desc=m[1].trim();continue}
+    if((m=L.match(/\bMOA\b\s*:?\s*(.+)$/i))){c.moa=c.moa.concat(m[1].match(/\b(MA\d{2,3}|M\d{1,3}|N\d{1,3})\b/g)||[]);continue}
+    if((m=L.match(/\bREM\s*:\s*(.+)$/i))){const r=m[1].toUpperCase().match(/\b(MA\d{2,3}|M\d{1,3}|N\d{1,3})\b/g)||[];if(last)last.rarc=[...new Set((last.rarc?last.rarc.split(', '):[]).concat(r))].join(', ');continue}
+    const hm=L.match(/(?:^|\s)(\d{1,3}(?:\.\d+)?)?\s*(?:HC|AD|NU|IV|N4|ZZ)\s*:\s*([A-Z0-9]{4,5})((?:\s*:\s*[A-Z0-9]{2})*)(?:\s+(.*))?$/i);
+    if(hm){const pre=L.slice(0,hm.index);const pd=pre.match(/\d{1,2}\/\d{1,2}\/\d{4}/g)||[];
+      const toks=(hm[4]||'').split(/\s+/).filter(Boolean);const amts=[];let i=0;
+      while(i<toks.length&&amts.length<3){const t=toks[i];if(amtTok(t))amts.push(num(t));else if(t==='-')amts.push(null);else break;i++}
+      const rest=toks.slice(i).join(' ').toUpperCase();
+      const adjs=[...rest.matchAll(/\b(CO|PR|OA|PI|CR)\s*-\s*([A-Z]?\d{1,3})\s*:?\s*([S$]?-?[\d,]+\.\d{2})?/g)];
+      const pr=adjs.filter(a=>a[1]==='PR'&&a[3]).map(a=>num(a[3]));
+      const from=pd[0]||pFrom||'',to=pd[1]||pTo||from;
+      last={src,payer,check,checkDate:dt,patient:c.patient,dosFrom:from,dosTo:to,cpt:hm[2].toUpperCase(),mod:(hm[3]||'').split(':').map(x=>x.trim().toUpperCase()).filter(Boolean).join(' '),units:hm[1]||'',dx:'',
+        billed:amts[0]!=null?amts[0]:null,paid:amts[1]!=null?amts[1]:null,allowed:amts[2]!=null?amts[2]:null,ptResp:pr.length?pr.reduce((a,b)=>a+b,0):null,
+        adj:adjs.map(a=>a[1]+'-'+a[2]+(a[3]?' '+money(num(a[3])):'')).join(', '),rarc:(rest.match(/\b(MA\d{2,3}|M\d{1,3}|N\d{1,3})\b/g)||[]).join(', '),raw:L,_c:c};
+      out.push(last);awaitTo=!pd[1];pFrom='';pTo='';continue}
+    if((m=L.match(/^(\d{1,2}\/\d{1,2}\/\d{4})\s*(-)?\s*(\d{1,2}\/\d{1,2}\/\d{4})?$/))){
+      if(m[3]){pFrom=m[1];pTo=m[3];awaitTo=false}else if(m[2]){pFrom=m[1];awaitTo=false}else if(last&&awaitTo){last.dosTo=m[1];awaitTo=false}else pTo=m[1];continue}
+  }
+  for(const l of out){const k=l._c;delete l._c;l.memberId=k.memberId;l.icn=k.icn;l.acct=k.acct;
+    l.claimStatus=(k.status?k.status+' - ':'')+(k.desc||STATUS_TXT[k.status]||'')+(k.prov?' · Provider: '+k.prov:'');
+    if(k.moa.length)l.rarc=[...new Set((l.rarc?l.rarc.split(', '):[]).concat(k.moa))].join(', ')}
+  const cb=claims.every(k=>k.claimAmt!=null)&&claims.length?claims.reduce((t,k)=>t+k.claimAmt,0):null;
+  if(out.length)out.recon={billed:cb,paid:hdrAmt};
+  return out}
+
+/* ===== Universal parsing layer (835 EDI, TriZetto Gateway, Office Ally check details, auto-column tables, label/value pages) ===== */
+const STATUS_TXT={'1':'Processed as Primary','2':'Processed as Secondary','3':'Processed as Tertiary','4':'Denied','19':'Processed as Primary, Forwarded','20':'Processed as Secondary, Forwarded','21':'Processed as Tertiary, Forwarded','22':'Reversal of Previous Payment','23':'Not Our Claim, Forwarded','25':'Predetermination Pricing Only'};
+const amtTok=t=>/^[S$]?-?\$?[\d,]+\.\d{2}$/.test(t);
+const MONEY_RE=/^\(?-?\$?-?[\d,]*\d\.\d{2}\)?-?$/;
+function splitProc(tok){const t=String(tok||'').toUpperCase();const m=t.match(/^(\d{4}[0-9FTU]|[A-V]\d{4})([A-Z0-9]*)$/);if(!m)return null;
+  if(/^\d{5}$/.test(m[1])){const n=+m[1];if(n<100||n>99607)return null}
+  const rest=m[2];if(rest.length%2||rest.length>8)return null;const mods=rest.match(/.{2}/g)||[];
+  if(!mods.every(x=>MODS.has(x)||/^[A-Z][A-Z0-9]$|^[0-9][A-Z]$/.test(x)))return null;return{cpt:m[1],mods}}
+function cptFrom(s){if(!s)return null;const toks=String(s).toUpperCase().replace(/\b(HC|AD|NU|IV|ZZ|N4|ER|WK)\s*[:;]/g,' ').split(/[\s,]+/).filter(Boolean);
+  for(let i=0;i<toks.length;i++){const parts=toks[i].split(/[:\-]/).filter(Boolean);if(!parts.length)continue;const sp=splitProc(parts[0]);
+    if(sp){const mods=sp.mods.concat(parts.slice(1).filter(x=>/^[A-Z0-9]{2}$/.test(x)));for(let j=i+1;j<toks.length&&MODS.has(toks[j])&&mods.length<4;j++)mods.push(toks[j]);return{cpt:sp.cpt,mods}}}
+  return null}
+function firstMoney(s){if(!s)return null;const m=String(s).match(/\(?-?\$?\s?-?[\d,]*\d\.\d{2}\)?/);return m?num(m[0]):null}
+/* year printed on the document: most frequent explicit 4-digit year in mm/dd/yyyy dates (never a guess from the clock) */
+function docYear(text){const c={};let m;const re=/\b\d{1,2}\/\d{1,2}\/\s?(20\d{2})\b/g;const t=String(text||'');while((m=re.exec(t)))c[m[1]]=(c[m[1]]||0)+1;
+  const ks=Object.keys(c).sort((a,b)=>c[b]-c[a]||b-a);if(ks.length)return ks[0];const m2=t.match(/\b20\d{2}\b/);return m2?m2[0]:''}
+/* safety net: if the document itself prints a DOS (mm/dd) with an explicit year, a parsed line must carry that same year */
+function repairDates(lines,text){const seen={};const t=String(text||'');let m;const add=(k,y)=>{(seen[k]=seen[k]||new Set()).add(y)};
+  const re=/\b(\d{1,2})\/(\d{1,2})\/\s?(20\d{2})\b/g;while((m=re.exec(t)))add(m[1].padStart(2,'0')+'/'+m[2].padStart(2,'0'),m[3]);
+  const re2=/\b(20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\b/g;while((m=re2.exec(t)))add(m[2]+'/'+m[3],m[1]);
+  const fix=d=>{const mm=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(d||'');if(!mm)return d;const s=seen[mm[1]+'/'+mm[2]];return(s&&s.size===1&&!s.has(mm[3]))?mm[1]+'/'+mm[2]+'/'+[...s][0]:d};
+  (lines||[]).forEach(l=>{['dosFrom','dosTo','checkDate'].forEach(k=>{if(l[k])l[k]=fix(l[k])})});return lines}
+function datesIn(s,yearHint){const out=[];if(!s)return out;let m;const re=/\b(\d{1,2})\/(\d{1,2})\/ ?(\d{2,4})\b|\b(20\d{2})-?(0[1-9]|1[0-2])-?(0[1-9]|[12]\d|3[01])\b|\b(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])(\d{2})?\b/g;
+  while((m=re.exec(s))){if(m[1]){let y=m[3];if(y.length===2)y='20'+y;out.push(m[1].padStart(2,'0')+'/'+m[2].padStart(2,'0')+'/'+y)}else if(m[4])out.push(m[5]+'/'+m[6]+'/'+m[4]);else if(m[7])out.push(m[7]+'/'+m[8]+'/'+(m[9]?'20'+m[9]:'????'))}
+  const yr=((out.find(d=>!d.endsWith('????'))||'').slice(-4))||yearHint||'';return out.map(d=>d.endsWith('????')?d.slice(0,6)+(yr||''):d)}
+const CODE_RE=/\b(CO|PR|OA|PI|CR)\s*-?\s*([A-Z]?\d{1,3})\b/g, RARC_RE=/\b(MA\d{2,3}|M\d{1,3}|N\d{1,3})\b/g;
+function codesIn(s){const a=[],r=[];if(!s)return{a,r};const t=String(s).toUpperCase();let m;CODE_RE.lastIndex=0;while((m=CODE_RE.exec(t)))a.push(m[1]+'-'+m[2]);RARC_RE.lastIndex=0;while((m=RARC_RE.exec(t)))r.push(m[1]);return{a:[...new Set(a)],r:[...new Set(r)]}}
+
+/* ---------- X12 835 ERA (raw file from any clearinghouse: Availity, Waystar, TriZetto, Office Ally, Change/Optum, Claim.MD …) ---------- */
+function parse835EDI(raw,src){
+  const t=String(raw).replace(/^﻿/,'');const isa=t.search(/ISA[^A-Za-z0-9\s]/);let el='*',comp=':',seg='~';
+  if(isa>=0&&t.length>isa+105){el=t[isa+3];comp=t[isa+104];seg=t[isa+105]}else{const m=t.match(/CLP([^A-Za-z0-9\s])/);if(m)el=m[1]}
+  const parts=(!seg||/[\r\n]/.test(seg)||/[A-Za-z0-9 ]/.test(seg))?t.split(/\r?\n/):t.split(seg);
+  const segs=parts.map(s=>s.trim()).filter(Boolean);
+  const claims=[];let payer='',check='',checkDate='',bpr=0,cl=null,sv=null,plb=0;
+  for(const s of segs){const e=s.split(el).map(x=>x.trim());const id=e[0];
+    if(id==='ST'){payer='';check='';checkDate='';cl=null;sv=null}
+    else if(id==='BPR'){bpr+=num(e[2])||0;checkDate=d8(e[16]||'')}
+    else if(id==='TRN'){check=e[2]||check}
+    else if(id==='N1'&&e[1]==='PR'){payer=e[2]||payer}
+    else if(id==='CLP'){cl={acct:e[1]||'',status:e[2]||'',billed:num(e[3]),paid:num(e[4]),ptResp:num(e[5]),icn:e[7]||'',freq:e[9]||'',patient:'',memberId:'',corrId:'',rendering:'',from:'',to:'',cas:[],rarc:[],lines:[],payer,check,checkDate};claims.push(cl);sv=null}
+    else if(id==='NM1'&&cl){const nm=[e[3],[e[4],e[5]].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+      if(e[1]==='QC'){cl.patient=nm;if(e[9])cl.memberId=e[9]}
+      else if(e[1]==='IL'){if(!cl.memberId&&e[9])cl.memberId=e[9];if(!cl.patient)cl.patient=nm}
+      else if(e[1]==='74'){cl.corrId=e[9]||nm}
+      else if(e[1]==='82'){cl.rendering=nm+(e[9]?' (NPI '+e[9]+')':'')}}
+    else if(id==='MOA'&&cl){[3,4,5,6,7].forEach(i=>{if(e[i])cl.rarc.push(e[i])})}
+    else if(id==='MIA'&&cl){[5,20,21,22,23].forEach(i=>{if(e[i])cl.rarc.push(e[i])})}
+    else if(id==='DTM'){const q=e[1],v=d8(e[2]||'');if(sv&&(q==='472'||q==='150'))sv.from=v;else if(sv&&q==='151')sv.to=v;else if(cl&&!sv&&q==='232')cl.from=v;else if(cl&&!sv&&q==='233')cl.to=v}
+    else if(id==='CAS'){const tg=sv||cl;if(tg)for(let i=2;i+1<e.length;i+=3){if(e[i])tg.cas.push({g:e[1],r:e[i],a:num(e[i+1])})}}
+    else if(id==='SVC'&&cl){const p=(e[1]||'').split(comp);sv={qual:p[0]||'',cpt:p[1]||'',mods:p.slice(2,6).filter(Boolean),billed:num(e[2]),paid:num(e[3]),units:e[5]||'1',from:'',to:'',cas:[],rarc:[],allowed:null};cl.lines.push(sv)}
+    else if(id==='AMT'&&sv&&e[1]==='B6'){sv.allowed=num(e[2])}
+    else if(id==='LQ'&&sv){if(e[2])sv.rarc.push(e[2])}
+    else if(id==='PLB'){for(let i=4;i<e.length;i+=2)plb+=num(e[i])||0}
+  }
+  const out=[];const fc=c=>c.g+'-'+c.r+(c.a!=null?' '+money(c.a):'');
+  for(const c of claims){const cc=c.cas.map(fc).join(', ');
+    const base={src,payer:c.payer,check:c.check,checkDate:c.checkDate,patient:c.patient,memberId:c.memberId+(c.corrId?' (corrected: '+c.corrId+')':''),acct:c.acct,icn:c.icn,
+      claimStatus:(c.status?c.status+' - ':'')+(STATUS_TXT[c.status]||'')+(c.freq==='7'?' (replacement claim)':'')+(c.rendering?' · Rendering: '+c.rendering:''),dx:''};
+    if(!c.lines.length){out.push(Object.assign({},base,{dosFrom:c.from,dosTo:c.to||c.from,cpt:'',mod:'',units:'',billed:c.billed,allowed:null,paid:c.paid,ptResp:c.ptResp||null,adj:cc,rarc:[...new Set(c.rarc)].join(', '),raw:'Claim-level only (no service lines in 835)'}));continue}
+    c.lines.forEach((l,i)=>{const pr=l.cas.filter(x=>x.g==='PR').reduce((a,x)=>a+(x.a||0),0);
+      out.push(Object.assign({},base,{dosFrom:l.from||c.from,dosTo:l.to||l.from||c.to||c.from,cpt:l.cpt,mod:l.mods.join(' '),units:l.units,billed:l.billed,allowed:l.allowed,paid:l.paid,ptResp:pr||null,
+        adj:l.cas.map(fc).join(', ')+(i===0&&cc?(l.cas.length?'; ':'')+'Claim-level: '+cc:''),rarc:[...new Set(l.rarc.concat(c.rarc))].join(', '),raw:'SVC '+l.qual+':'+[l.cpt].concat(l.mods).join(':')+' billed '+l.billed+' paid '+l.paid}))});
+  }
+  out.recon={billed:claims.reduce((a,c)=>a+(c.billed||0),0),paid:claims.reduce((a,c)=>a+(c.paid||0),0),check:bpr,plb};
+  return out}
+
+/* ---------- TriZetto Gateway EDI "Standard Remittance View" ---------- */
+function parseGateway(text,src){
+  const rows=text.split(/\r?\n/).map(s=>s.replace(/\s+/g,' ').trim()).filter(Boolean);
+  const hp=text.match(/^\s*(.+?)\s*:\s*([A-Z0-9-]+)\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})\s*:\s*\d+\s*-\s*Standard Remittance View/im);
+  let payer=hp?hp[1].replace(/^.*\d{1,2}:\d{2}\s*[AP]M\s*/i,'').trim():'';
+  if(!payer){const i=rows.findIndex(r=>/^Check Information$/i.test(r));if(i>=0&&rows[i+1])payer=rows[i+1]}
+  if(!payer)payer=detectPayer(text);
+  const check=(text.match(/Check\s*#\s*:\s*([A-Z0-9-]+)/i)||[])[1]||(hp?hp[2]:'');
+  const cdate=(text.match(/Check Date\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/i)||[])[1]||(hp?hp[3]:'');
+  const out=[];let c=null;const pad=d=>(datesIn(d)[0]||d);
+  for(const L of rows){let m;
+    if((m=L.match(/^Patient Name\s*:\s*(.+)$/i))){c={patient:cleanName(m[1]),memberId:'',acct:'',icn:'',status:'',cAdj:'',cRarc:''};const id=L.match(/Identification\s*#\s*:\s*([A-Z0-9]+)/i);if(id)c.memberId=id[1];continue}
+    if(!c)continue;
+    if((m=L.match(/^Insured Name\s*:.*?Identification\s*#\s*:\s*([A-Z0-9]+)(.*)$/i))){if(/corrected/i.test(m[2])&&m[1]!==c.memberId)c.memberId+=' (corrected: '+m[1]+')';else if(!c.memberId)c.memberId=m[1]}
+    if((m=L.match(/Patient Account Number\s*:\s*([A-Z0-9.-]+)/i)))c.acct=m[1];
+    if((m=L.match(/ICN#?\s*:\s*([A-Z0-9-]+)/i)))c.icn=m[1];
+    if((m=L.match(/^Claim Status\s*:\s*(.+?)(?:\s+Rendering Provider.*)?$/i)))c.status=m[1].trim();
+    if(/^Claim Adj Codes\s*:/i.test(L))c.cAdj=codesIn(L.replace(/Patient Responsibility.*$/i,'')).a.join(', ');
+    if(/^Claim Remark Codes\s*:/i.test(L))c.cRarc=codesIn(L.replace(/Patient Responsibility.*$/i,'')).r.join(', ');
+    if((m=L.match(/^(\d{1,2}\/\d{1,2}\/\d{4})\s+(\d{1,2}\/\d{1,2}\/\d{4})\s*(.*)$/))){
+      const toks=m[3].split(/\s+/).filter(Boolean);let units='',cpt='',mods=[],sp;const amts=[],codes=[],rarc=[];
+      for(const tk of toks){const T=tk.toUpperCase().replace(/,$/,'');
+        if(amtTok(T))amts.push(num(T));
+        else if(/^(CO|PR|OA|PI|CR)-?[A-Z]?\d{1,3}$/.test(T))codes.push(T.replace(/^(CO|PR|OA|PI|CR)-?/,'$1-'));
+        else if(/^(MA\d{2,3}|M\d{1,3}|N\d{1,3})$/.test(T)&&cpt)rarc.push(T);
+        else if(/^\d{10}$/.test(T))continue;
+        else if(!cpt&&(sp=cptFrom(T))){cpt=sp.cpt;mods=sp.mods}
+        else if(cpt&&MODS.has(T)&&!amts.length)mods.push(T);
+        else if(!cpt&&/^\d{1,3}(\.\d+)?$/.test(T))units=T}
+      const pr=(amts[2]||0)+(amts[3]||0)+(amts[4]||0);
+      out.push({src,payer,check,checkDate:pad(cdate),patient:c.patient,memberId:c.memberId,acct:c.acct,icn:c.icn,claimStatus:c.status,dosFrom:pad(m[1]),dosTo:pad(m[2]),cpt,mod:mods.join(' '),units,dx:'',
+        billed:amts.length?amts[0]:null,allowed:amts.length>1?amts[1]:null,paid:amts.length>1?amts[amts.length-1]:null,ptResp:pr||null,adj:codes.join(', ')||c.cAdj,
+        rarc:[...new Set(rarc.concat(c.cRarc?c.cRarc.split(', '):[]))].join(', '),raw:L})}
+  }
+  const tot=text.match(/^\s*TOTALS\s*:\s*((?:\$?-?[\d,]+\.\d{2}\s*)+)/im);
+  if(tot){const v=(tot[1].match(/\$?-?[\d,]+\.\d{2}/g)||[]).map(num);out.recon={billed:v.length>1?v[1]:null,paid:v.length?v[v.length-1]:null}}
+  return out}
+
+/* ---------- Office Ally "View EOB/ERA Check Details (Autopost)" printout ----------
+   Layout: Check Info / Payer / Pay To box, then per claim: "Claim | Patient ID | Last, First Name | Charge Amt | Payment Amt | Accnt# | Status"
+   followed by a service table "Service Date | CPT | Charge Amt | Payment Amt | Adj. Amt | Remarks | Adjustment Details (Group, Amount, Reason)".
+   Adjustment cells hold group name + amount + reason text (wrapped over several lines, possibly several groups per service line). */
+const OA_M='\\$?-?\\$?[\\d,]*\\d\\.\\d{2}';
+const OA_REASONS=[[/CLAIM SPECIFIC NEGOTIATED DISCOUNT/,'131'],[/SEQUESTRATION/,'253'],[/PAID BY ANOTHER PAYER|ANOTHER PAYER/,'23'],[/FEE SCHEDULE|MAXIMUM ALLOWABLE|CONTRACTED/,'45'],[/DEDUCTIBLE/,'1'],[/COINSURANCE/,'2'],[/CO-?PAY/,'3'],[/DUPLICATE/,'18'],[/TIMELY FILING|TIME LIMIT/,'29'],[/MEDICAL(?:LY)? NECESSIT/,'50'],[/NOT COVERED|NON-?COVERED/,'96'],[/AUTHORIZATION|PRECERT/,'197'],[/NOT PAID SEPARATELY/,'234'],[/BUNDLED|INCLUDED IN/,'97'],[/LACKS INFORMATION|MISSING/,'16']];
+function oaPayer(rows,text){
+  for(let i=0;i<rows.length;i++){const ws=rows[i].words;if(!ws)continue;const pi=ws.findIndex(w=>/^Payer:?$/i.test(w.s));if(pi<0)continue;
+    const ti=ws.findIndex((w,k)=>/^Pay$/i.test(w.s)&&ws[k+1]&&/^To:?$/i.test(ws[k+1].s));const px=ws[pi].x0,tx=ti>=0?ws[ti].x0:1e9;
+    for(let j=i+1;j<Math.min(rows.length,i+4);j++){const cell=rows[j].words.filter(w=>w.x0>=px-4&&w.x0<tx-4).map(w=>w.s).join(' ').trim();if(cell)return cell.replace(/\s+/g,' ')}}
+  return detectPayer(text)}
+function parseOfficeAlly(text,src,rows){
+  rows=rows&&rows.length?rows:rowsFromText(text);const out=[];
+  const reHead=new RegExp('^(\\d{1,3})\\s+([A-Z0-9]{5,})\\s+(.+?,\\s*[A-Za-z][A-Za-z .\'-]*?)\\s+('+OA_M+')\\s+('+OA_M+')\\s+(\\d{5,})\\b\\s*(.*)$','i');
+  const reSvc=new RegExp('^(\\d{1,2}\\/\\d{1,2}\\/\\d{4})\\s+(.+?)\\s+('+OA_M+')\\s+('+OA_M+')\\s+('+OA_M+')(?=\\s|$)\\s*(.*)$');
+  const check=(text.match(/Check\s*Number\s*:\s*([A-Z0-9-]+)/i)||[])[1]||'';
+  const cdt=(text.match(/Check\s*Date\s*:\s*(\d{1,2}\/\d{1,2}\/\d{4})/i)||[])[1]||'';
+  const camt=num((text.match(/Check\s*Amount\s*:\s*(\$?-?\$?[\d,]+\.\d{2})/i)||[])[1]);
+  const payer=oaPayer(rows,text);
+  let cl=null,cur=null;
+  const fin=()=>{if(!cur)return;const rest=cur.rest.replace(/\s+/g,' ').trim().toUpperCase();
+    const gs=[];let m;const gre=/\b(CONTRACTUAL|PATIENT(?=\s*(?:\$|-?\$|RESPONSIBILITY))|INITIATED|CORRECTIONS?|OTHER(?=\s*(?:\$|-?\$|ADJUST)))/g;
+    while((m=gre.exec(rest))){const k=m[1];gs.push({i:m.index,g:k==='CONTRACTUAL'?'CO':k==='PATIENT'?'PR':k==='INITIATED'?'PI':/^CORRECTION/.test(k)?'CR':'OA',a:null,c:''})}
+    const ams=[...rest.matchAll(new RegExp('('+OA_M+')','g'))].map(x=>num(x[1]));
+    gs.forEach((x,k)=>{if(k<ams.length)x.a=ams[k]});
+    if(!gs.length&&ams.length)gs.push({i:0,g:'CO',a:ams[0],c:''});
+    for(const [re,code] of OA_REASONS){const r=re.exec(rest);if(!r||!gs.length)continue;let t=gs[0];for(const x of gs)if(x.i<=r.index)t=x;if(!t.c)t.c=code}
+    const adj=gs.map(x=>x.g+(x.c?'-'+x.c:'')+(x.a!=null?' '+money(x.a):'')).join(', ');
+    const pr=gs.filter(x=>x.g==='PR'&&x.a!=null).reduce((t,x)=>t+x.a,0);
+    const cp=cptFrom(cur.mid);
+    out.push({src,payer,check,checkDate:cdt,patient:cl.patient,memberId:cl.memberId,acct:cl.acct,icn:'',claimStatus:cl.status,dosFrom:cur.dos,dosTo:cur.dos,
+      cpt:cp?cp.cpt:cur.mid.split(/\s+/)[0],mod:cp?cp.mods.join(' '):'',units:'',dx:'',billed:num(cur.b),allowed:null,paid:num(cur.p),ptResp:pr||null,adj,rarc:'',
+      raw:cur.line+(rest?' | '+rest:'')});cur=null};
+  for(const r of rows){const txt=(r.text||rowText(r.words)).replace(/\s+/g,' ').trim();if(!txt)continue;
+    if(/https?:\/\/|View EOB\/ERA|^\d{1,2}\/\d{1,2}\/\d{2},\s/i.test(txt)||/^Autopost$/i.test(txt)||/^(Service|Date|Service Date)$/i.test(txt)||/Charge Amt|Adjustment Details|Claim\s+Patient ID/i.test(txt))continue;
+    let m;
+    if((m=txt.match(reHead))){fin();let st=(m[7]||'').trim();cl={patient:m[3].replace(/\s+/g,' ').trim(),memberId:m[2],acct:m[6],status:st?st.charAt(0)+st.slice(1).toLowerCase().replace(/\b(as|of)\b/g,x=>x):''};cur=null;continue}
+    if(cl&&(m=txt.match(reSvc))&&cptFrom(m[2])){fin();cur={dos:m[1].replace(/^(\d)\//,'0$1/').replace(/\/(\d)\//,'/0$1/'),mid:m[2],b:m[3],p:m[4],adjAmt:m[5],rest:m[6]||'',line:txt};continue}
+    if(cur)cur.rest+=' '+txt}
+  fin();
+  out.recon={billed:null,paid:camt};
+  return out}
+
+/* ---------- positional rows ---------- */
+function medianCw(words){const a=words.map(w=>w.cw).filter(x=>x>0).sort((x,y)=>x-y);return a.length?a[a.length>>1]:1}
+function rowText(words){let s='',end=null;const cw=medianCw(words);for(const w of words){if(end!=null)s+=(w.x0-end>2.2*cw?'   ':' ');s+=w.s;end=w.x1}return s}
+function groupRows(words,tol){words.sort((a,b)=>b.y-a.y||a.x0-b.x0);const rows=[];for(const w of words){const r=rows[rows.length-1];if(r&&Math.abs(r.y-w.y)<=tol)r.words.push(w);else rows.push({y:w.y,words:[w]})}
+  rows.forEach(r=>{r.words.sort((a,b)=>a.x0-b.x0);r.text=rowText(r.words)});return rows}
+function rowsFromText(text){return String(text).split(/\r?\n/).map((line,i)=>{const words=[];const re=/\S+/g;let m;while((m=re.exec(line)))words.push({x0:m.index,x1:m.index+m[0].length,s:m[0],cw:1});return{y:-i*10,words,text:line.replace(/\s+$/,'')}}).filter(r=>r.words.length)}
+const COLRULES=[
+ ['pos',/^(POS|PLACE( OF SERVICE)?|PL OF SVC|PL SVC)$/],
+ ['ignore',/^(PERF PROV|RENDERING( PROVIDER)?( NPI)?|REND(ERING)? NPI|NPI|PROV(IDER)? (ID|NPI|NO)|LINE( NO| #| NUM)?|LN|SEQ|TOOTH|REV( CODE)?|LATE FILING( RED)?|LATE|INTEREST|OTHER|DIAG PTR|DX PTR|POINTER|NDC|RX)$/],
+ ['rarc',/^(REMARKS?( CODES?)?|RARCS?|REM|RMK|REMARK CODE|RMK CODES?)$/],
+ ['units',/^(UNITS?|NUM|QTY|NOS|SVC UNITS|PAID UNITS|DAYS UNITS|DAYS ?\/ ?UNITS|UNT|UNITS BILLED|SERVICE UNITS)$/],
+ ['ptPaid',/^(PT PAID|PATIENT PAID|PAT PAID)$/],
+ ['adj',/^(ADJ(UST(MENT)?)?S?( (CODES?|REASONS?|RSN|GRP|GROUP|AMT|AMOUNT))?|ADJ CODE|GRP ?\/? ?RC( ?-? ?AMT)?|GROUP ?\/? ?(REASON|RC)( CODES?)?( AMT)?|CARCS?|REASON( CODES?)?|RSN( CD| CODES?)?|AC|CODES|DENIAL( CODES?| REASONS?)?|EXPL(ANATION)?( CODES?)?|EX( CODES?)?|EOB( CODES?)?|MSG|OTHER ADJUSTS?|ADJUSTMENT REASON|CLAIM ADJ|CONTRACTUAL( ADJ)?|NOT COVERED|DISALLOW(ED)?( AMT)?)$/],
+ ['dosTo',/^(TO|THRU|THROUGH|END( SERVICE)?( DATE)?|TO DATE|DOS TO|SERVICE TO|SVC TO|TO DOS|END DATE)$/],
+ ['dos',/^(DOS( FROM)?( THRU)?|DATES?( OF SERVICE| OF SVC)?|SERV(ICE)? DATES?|SVC( DATES?| DT)|FROM( DATE| DOS)?|BEGIN( SERVICE)?( DATE)?|YYYYMMDD|MMDDYY|SERVICE FROM|SRV DT|DATE OF SERVICE|FROM THRU|SERV DT)$/],
+ ['cpt',/^(PROC(EDURE)?( CODE| CD)?( MODS?)?|CPT( CODE| HCPCS)?|HCPCS( CODE)?|CPT ?\/ ?HCPCS|SERV(ICE)? CODE|SVC CODE|CODE|PROC ?\/ ?REV( CODE)?( MODS?)?|BILLED CODE|SERVICE|PROCEDURE|PROC CODE MOD|CPT MOD|SVC|CPT ?\/ ?MOD|PROCEDURE ?\/ ?MOD(IFIER)?S?|PROC ?\/ ?MOD)$/],
+ ['mod',/^(MODS?|MODIFIERS?|MOD ?S|MODIFIER ?S)$/],
+ ['billed',/^(BILLED( AMT| AMOUNT| CHARGES?)?|CHARGES?( AMT| AMOUNT)?|SUBMITTED( CHARGES?| AMT| AMOUNT)?|AMT BILLED|TOTAL CHARGES?|CHARGED( AMT)?|AMOUNT BILLED|BILL AMT|BILLED CHARGE|CLAIMED( AMT)?)$/],
+ ['allowed',/^(ALLOWED( AMT| AMOUNT)?|ALLOWABLE( AMT)?|APPROVED( AMT| AMOUNT)?|ELIGIBLE( AMT| AMOUNT)?|ALLOW( AMT)?|CONTRACT( AMT)?|MAX ALLOWED|COVERED( AMT)?)$/],
+ ['deduct',/^(DEDUCT(IBLE)?( AMT| AMOUNT)?|DED( AMT)?)$/],
+ ['coins',/^(CO ?INS(UR(ANCE)?)?( AMT| AMOUNT)?)$/],
+ ['copay',/^(CO ?PAY(MENT)?( AMT| AMOUNT)?)$/],
+ ['ptResp',/^(PT RESP|PATIENT RESP(ONSIBILITY)?|PR( AMT)?|MEMBER RESP(ONSIBILITY)?|PAT RESP|MBR RESP|PATIENT LIABILITY|MEMBER LIABILITY)$/],
+ ['paid',/^(PAID( AMT| AMOUNT)?|PROV(IDER)? ?(PD|PAID)|NET PAID|PAYMENT( AMT| AMOUNT)?|AMOUNT PAID|PLAN PAID|INS(URANCE)? PAID|PAYABLE|NET PAY(MENT)?|PAID TO PROVIDER|PROVIDER PAYMENT|NET( AMT)?|TOTAL PAID|BENEFIT( AMT)?|PAID BY PLAN)$/]];
+const normLab=s=>String(s).toUpperCase().replace(/[^A-Z0-9\/ ]/g,' ').replace(/\s+/g,' ').trim();
+/* extra column vocabulary used by PM / EHR / DME / therapy ERA reports (AdvancedMD, athena, Epic, NextGen, Brightree, WebPT …) */
+const COL_EXTRA=[
+ ['units',/^(QTY BILLED|UNITS BILLED|SVC QTY|QUANTITY|QTY PAID|BILLED UNITS|UNITS PD)$/],
+ ['mod',/^(MOD ?[1-4]|MODIFIER ?[1-4]|MODS ?1 ?4|M1|M2|M3|M4)$/],
+ ['adj',/^(KICK( CODES?| REASONS?)?|CARC ?\/ ?RARC|CLAIM ADJ REASON|ADJ GRP RSN|GRP RSN( AMT)?|ADJ RSN|ADJ AMT|WRITE ?OFF( AMT)?|W ?\/ ?O( AMT)?|CONTRACTUAL AMT|CONT ADJ|ADJ REASON CODES?|DENIAL CODE|REJECT( CODES?| REASON)?)$/],
+ ['rarc',/^(REMIT CODES?|RMK CD|REMARK CD|MSG CODES?|MOA|REMIT REMARKS?|RARC CODES?)$/],
+ ['dosTo',/^(TO DT|SVC THRU|THRU DATE|SVC TO DT|END DT|DOS TO DATE)$/],
+ ['dos',/^(SVC DT|DT OF SVC|DOS FROM|FROM DT|SERVICE DT|SVC FROM|SVC DATE FROM|START DATE|VISIT DATE|ENCOUNTER DATE|DATE OF SVC|SVC DATE)$/],
+ ['cpt',/^(CPT ?4|HCPC|ITEM( CODE)?|BILLING CODE|PROC ?\/ ?HCPCS|CODE ?\/ ?MOD|SVC CD|SERV CD|PROC CODE ?\/ ?MOD|CHARGE CODE|SERVICE ITEM|HCPCS ?\/ ?MOD)$/],
+ ['billed',/^(CHG( AMT)?|CHRG( AMT)?|CHARGE AMT|BILLED AMT|LINE CHARGE|CLAIM CHARGE|TOT CHG|SUBMITTED CHG|AMT CHARGED|FEE|CHARGES BILLED)$/],
+ ['allowed',/^(ALLWD( AMT)?|ALWD( AMT)?|APPRVD( AMT)?|APPR AMT|MAX ALLOWABLE|ALLOWED CHG|EXPECTED)$/],
+ ['paid',/^(PMT( AMT)?|PYMT( AMT)?|INS PMT|INS PAID|PD AMT|PLAN PMT|PAYER PAID|PYR PD|INSURANCE PAYMENT|PRIMARY PAID|CARRIER PAID|PAYMENT RECEIVED|PAID TO PROV)$/],
+ ['deduct',/^(DEDUCT AMT|DEDUCTIBLE AMT|DED AMT)$/],
+ ['coins',/^(COINS AMT|CO ?INSURANCE AMT|COINSUR)$/],
+ ['copay',/^(COPAY AMT|CO ?PAY AMT)$/],
+ ['ptResp',/^(PT RESP AMT|PAT RESP AMT|PR AMOUNT|PATIENT PORTION|PATIENT BALANCE|PT BAL|PT RESPONSIBILITY)$/]];
+function colKind(label){const L=normLab(label);if(!L)return null;const cu=CUSTOM.labels[L];if(cu)return cu==='ignore'?'ignore':cu;
+  for(const [k,re] of COLRULES)if(re.test(L))return k;for(const [k,re] of COL_EXTRA)if(re.test(L))return k;return null}
+function phrases(words,cw){const out=[];for(const w of words){const p=out[out.length-1];if(p&&w.x0-p.x1<=1.8*cw){p.s+=' '+w.s;p.x1=w.x1}else out.push({x0:w.x0,x1:w.x1,s:w.s,cw:w.cw})}return out}
+function stackRows(top,bot,cw){const res=top.map(w=>Object.assign({},w));for(const b of bot){const t=res.find(r=>Math.min(r.x1,b.x1)-Math.max(r.x0,b.x0)>-0.5*cw);if(t){t.s+=' '+b.s;t.x0=Math.min(t.x0,b.x0);t.x1=Math.max(t.x1,b.x1)}else res.push(Object.assign({},b))}return res.sort((a,b)=>a.x0-b.x0)}
+function headerOf(words,cw){const out=[];let i=0;
+  while(i<words.length){let hit=null;
+    for(let n=Math.min(5,words.length-i);n>=1;n--){let ok=true;for(let k=i+1;k<i+n;k++)if(words[k].x0-words[k-1].x1>1.8*cw){ok=false;break}if(!ok)continue;
+      const lab=words.slice(i,i+n).map(w=>w.s).join(' ');const kind=colKind(lab);if(kind){hit={kind,n,x0:words[i].x0,x1:words[i+n-1].x1,lab};break}}
+    if(hit){out.push(hit);i+=hit.n}else i++}
+  return out}
+function hdrScore(cols){const k=new Set(cols.map(c=>c.kind));const money=k.has('billed')||k.has('paid')||k.has('allowed');return((k.has('cpt')||k.has('dos'))&&money&&k.size>=3)?k.size:0}
+function readCells(words,cols,cw){const cells={};for(const w of words){let best=null,bd=1e9;const wc=(w.x0+w.x1)/2;
+    for(const c of cols){const cc=(c.x0+c.x1)/2;const d=(wc>=c.x0-0.6*cw&&wc<=c.x1+0.6*cw)?0:Math.min(Math.abs(wc-cc),Math.abs(w.x1-c.x1),Math.abs(w.x0-c.x0));if(d<bd){bd=d;best=c}}
+    if(best&&bd<=14*cw)(cells[best.kind]=cells[best.kind]||[]).push(w.s)}
+  for(const k in cells)cells[k]=cells[k].join(' ');return cells}
+const NOT_PT=/\b(ACCOUNT|NUMBER|CONTROL|RESP|RESPONSIBILITY|DATE|AMOUNT|STATUS|PROVIDER|PAYER|PAYEE|CLAIM|TOTALS?|PAID|BILLED|CHARGE|ADDRESS|INFORMATION|IDENTIFICATION)\b/i;
+const PT_RES=[
+  /(?<!PROVIDER\s|PAYEE\s|RENDERING\s|PAYER\s|PAYOR\s|FACILITY\s|PRACTICE\s|GROUP\s|BILLING\s|INSURED\s|SUBSCRIBER\s)\b(?:PATIENT(?:\s*FULL)?(?:\s*NAME)?|PT\s*NAME|MEMBER\s*NAME|BENEFICIARY(?:\s*NAME)?|CLIENT(?:\s*NAME)?|NAME)\s*[:#]?\s+([A-Z][A-Za-z'\-]+(?:\s*,\s*|\s+)[A-Z][A-Za-z'.\-]*(?:[\s,]+[A-Z][A-Za-z'.\-]*){0,2}?)(?=\s{2,}|\s+(?:HIC|HICN|MBI|ID|MEMBER|MID|ACCT|ACNT|ACCOUNT|CLAIM|ICN|TCN|DCN|DOB|PATIENT|SUBSCRIBER|INS|PCN|POLICY|CERT|GROUP|PAT|SEX|RENDERING|PROVIDER|MEDICAID|MEDICARE|RECIPIENT|INSURED)\b|\s*$)/i,
+  /^(?:NAME\s+)?([A-Z][A-Z'\-]+(?:\s[A-Z'\-]+)*,\s*[A-Z][A-Z'.\-]*(?:\s[A-Z][A-Z'.\-]*)*?)\s+(?:HIC|HICN|MBI|ID|MEMBER|MID|ACNT|ACCT|CLAIM|ICN)\b/];
+function contextFrom(txt){const c={};let m;
+  for(const re of ptRegexes()){if((m=txt.match(re))){const n=m[1].replace(/\s+/g,' ').trim();if(n.length>3&&!NOT_PT.test(n)){c.patient=n;break}}}
+  if((m=txt.match(/\b(?:MEMBER|SUBSCRIBER|PATIENT|INSURED|RECIPIENT|BENEFICIARY)\s*(?:ID|#|NO\.?|NUMBER|IDENTIFICATION\s*#?)\s*[:#]?\s*([A-Z0-9-]{5,})/i))||(m=txt.match(/\b(?:HIC|HICN|MBI|MID|CIN)\s*[:#]?\s*([A-Z0-9]{6,})/i)))c.memberId=m[1];
+  if((m=txt.match(/\b(?:PATIENT\s*(?:ACCOUNT|ACCT|CONTROL)\s*(?:NUMBER|NO\.?|#)?|PAT(?:IENT)?\s*CTRL\s*(?:NO|#)?|PCN|ACNT|ACCT\s*#?|ACCOUNT\s*(?:#|NO\.?|NUMBER)|PROVIDER\s*CLAIM\s*(?:ID|#)|ACT)\s*[:#]?\s*([A-Z0-9.\-]*\d[A-Z0-9.\-]*)/i)))c.acct=m[1];
+  if((m=txt.match(/\b(?:PAYER\s*CLAIM\s*(?:CONTROL\s*)?(?:ID|#|NUMBER|NO\.?)|ICN|TCN|DCN|CLAIM\s*(?:CONTROL\s*)?(?:#|NO\.?|NUMBER|ID))\s*(?:\/\s*ICN\s*#?)?\s*[:#]?\s*([A-Z0-9\-]*\d[A-Z0-9\-]{4,})/i)))c.icn=m[1];
+  if((m=txt.match(/\bCLAIM\s*STATUS(?:\s*DESCRIPTION)?\s*[:#]?\s*([A-Za-z0-9][A-Za-z0-9 ,\-]{1,40}?)(?=\s{2,}|\s+[A-Z][A-Za-z ]{2,20}\s*:|$)/i)))c.status=m[1].trim();
+  if(/\b(?:DX|DIAG(?:NOSIS)?|ICD(?:-?10)?)\b/i.test(txt)){const d=parseDx(txt.replace(/^.*?\b(?:DX|DIAG(?:NOSIS)?|ICD(?:-?10)?)\b/i,''));if(d.length)c.dx=d.join(', ')}
+  if(/\bCLAIM\s*(?:ADJ|ADJUSTMENT|REMARK|LEVEL)|\bMOA\b/i.test(txt)){const k=codesIn(txt);if(k.a.length)c.cAdj=k.a.join(', ');if(k.r.length)c.cRarc=k.r.join(', ')}
+  return c}
+function headerFacts(text){const t=String(text);
+  const chk=(t.match(/\b(?:CHECK\s*(?:\/\s*EFT\s*)?(?:#|NO\.?|NUMBER|NUM)|EFT\s*(?:TRACE\s*)?(?:#|NO\.?|NUMBER)?|TRACE\s*(?:#|NUMBER)|REFERENCE\s*ID|PAYMENT\s*(?:#|NUMBER))\s*[:#]?\s*([A-Z]*-?\d[\w-]{3,})/i)||[])[1]||'';
+  const cd=(t.match(/\b(?:CHECK\s*DATE|PAYMENT\s*DATE|PAID\s*DATE|REMIT(?:TANCE)?\s*DATE|ISSUE\s*DATE|EFT\s*DATE|DATE\s*PAID)\s*[:#]?\s*(\d{1,2}\/\d{1,2}\/\d{2,4}|20\d{6})/i)||t.match(/(?:^|\s)Date\s*:\s*(\d{1,2}\/\d{1,2}\/\d{2,4})/m)||[])[1]||'';
+  const pa=(t.match(/\b(?:CHECK\s*(?:\/\s*EFT\s*)?AMOUNT|EFT\s*AMOUNT|PAYMENT\s*AMOUNT|TOTAL\s*PAYMENT|PAID\s*PROVIDER|TOTAL\s*PAID\s*AMOUNT|NET\s*PAYMENT)\s*[:#]?\s*\$?\s*(-?[\d,]+\.\d{2})/i)||t.match(/(?:^|\s)Amount\s*:\s*\$?(-?[\d,]+\.\d{2})/m)||[])[1];
+  return{check:chk,checkDate:cd?(datesIn(cd)[0]||d8(cd)):'',paidTotal:pa!=null?num(pa):null}}
+
+/* ---------- auto-detected table (any vendor) ---------- */
+function parseTableRows(rows,src,fullText){
+  const out=[];if(!rows||!rows.length)return out;const text=fullText||rows.map(r=>r.text).join('\n');const payer=detectPayer(text);const hf=headerFacts(text);
+  const yh=docYear(text);
+  let cols=null,ctx={},block=[],last=null,pFrom='',pTo='';
+  const flush=()=>{for(const o of block){if(!o.dx&&ctx.dx)o.dx=ctx.dx;if(!o.adj&&ctx.cAdj)o.adj=ctx.cAdj;if(ctx.cRarc)o.rarc=[...new Set((o.rarc?o.rarc.split(', '):[]).concat(ctx.cRarc.split(', ')))].join(', ');
+      ['memberId','acct','icn'].forEach(k=>{if(!o[k]&&ctx[k])o[k]=ctx[k]});if(!o.claimStatus&&ctx.status)o.claimStatus=ctx.status}block=[]};
+  for(let r=0;r<rows.length;r++){const row=rows[r];const words=row.words;const cw=medianCw(words);const txt=row.text||rowText(words);
+    const hasMoney=words.some(w=>MONEY_RE.test(w.s));
+    if(!hasMoney){let hc=headerOf(words,cw),used=0;const nx=rows[r+1];
+      if(nx&&!nx.words.some(w=>MONEY_RE.test(w.s))&&Math.abs(nx.y-row.y)<=Math.max(12,cw*3.5)){const st=headerOf(stackRows(phrases(words,cw),phrases(nx.words,cw),cw),cw);if(hdrScore(st)>hdrScore(hc)){hc=st;used=1}}
+      if(hdrScore(hc)){cols=hc;r+=used;continue}}
+    const cx=contextFrom(txt);
+    if(cx.patient&&cx.patient!==ctx.patient||(cx.icn&&ctx.icn&&cx.icn!==ctx.icn&&block.length)){flush();ctx={patient:cx.patient||ctx.patient};last=null}
+    for(const k of ['memberId','acct','icn','status','dx','cAdj','cRarc'])if(cx[k]&&!ctx[k])ctx[k]=cx[k];
+    if(!cols||/\bTOTALS?\b/i.test(txt))continue;
+    const cells=readCells(words,cols,cw);let cp=cptFrom(cells.cpt);if(!cp&&!cols.some(c=>c.kind==='cpt'))cp=cptFrom(txt);
+    const billed=firstMoney(cells.billed),paid=firstMoney(cells.paid);
+    if(cp&&(billed!=null||paid!=null)){const d=datesIn(cells.dos,yh),d2=datesIn(cells.dosTo,yh);
+      const k=codesIn([cells.adj,cells.rarc].filter(Boolean).join(' '));let adjs=k.a;
+      if(!adjs.length&&cells.adj){const bare=(cells.adj.toUpperCase().match(/(?:^|\s)([A-Z]?\d{1,3})(?=\s|$)/g)||[]).map(x=>x.trim()).filter(x=>!MONEY_RE.test(x));adjs=bare.map(x=>'RC-'+x)}
+      const mods=cp.mods.concat((cells.mod||'').toUpperCase().split(/[\s,:]+/).filter(x=>/^[A-Z0-9]{2}$/.test(x)));
+      const pr=['deduct','coins','copay'].map(k2=>firstMoney(cells[k2])).filter(v=>v!=null);
+      const o={src,payer,check:hf.check,checkDate:hf.checkDate,patient:ctx.patient||'',memberId:ctx.memberId||'',acct:ctx.acct||'',icn:ctx.icn||'',claimStatus:ctx.status||'',
+        dosFrom:d[0]||pFrom||'',dosTo:d2[0]||d[1]||pTo||d[0]||pFrom||'',cpt:cp.cpt,mod:[...new Set(mods)].join(' '),units:(cells.units||'').split(/\s+/)[0]||'',dx:'',
+        billed,allowed:firstMoney(cells.allowed),paid,ptResp:firstMoney(cells.ptResp)!=null?firstMoney(cells.ptResp):(pr.length?pr.reduce((a,b)=>a+b,0):null),adj:adjs.join(', '),rarc:k.r.join(', '),raw:txt};
+      out.push(o);block.push(o);last=o;pFrom='';pTo='';continue}
+    const k=codesIn(txt);
+    if(last&&!cp&&(k.a.length||k.r.length)&&!hasMoney){if(k.a.length)last.adj=[...new Set((last.adj?last.adj.split(', '):[]).concat(k.a))].join(', ');if(k.r.length)last.rarc=[...new Set((last.rarc?last.rarc.split(', '):[]).concat(k.r))].join(', ');continue}
+    const dd=datesIn(cells.dos||'',yh);if(!hasMoney&&!cp&&dd.length&&words.length<=3){if(last&&!pFrom&&last.dosTo===last.dosFrom&&dd[0]!==last.dosFrom&&/-\s*$/.test(rows[r-1]?rows[r-1].text||'':'')){last.dosTo=dd[0]}else{pFrom=dd[0];pTo=dd[1]||''}}
+  }
+  flush();
+  if(out.length&&hf.paidTotal!=null)out.recon={billed:null,paid:hf.paidTotal};
+  return out}
+
+/* ---------- label/value pages (Availity remittance & claim detail, Waystar/portal detail views) ---------- */
+const KVRULES=[
+ ['patient',/^(PATIENT( FULL)? NAME|PATIENT|MEMBER NAME|PT NAME|BENEFICIARY( NAME)?|CLIENT( NAME)?)$/],
+ ['memberId',/^(MEMBER ID|MEMBER #|MEMBER NUMBER|SUBSCRIBER ID|PATIENT ID|INSURED ID|HIC|HICN|MBI|MEDICAID ID|CIN|POLICY( NUMBER| #)?)$/],
+ ['acct',/^(PATIENT CONTROL( NUMBER| #| NO)?|PATIENT ACCOUNT( NUMBER| #| NO)?|PATIENT ACCT( #)?|PCN|ACCOUNT( NUMBER| #)?|PROVIDER CLAIM( ID| #| NUMBER)?|PAT CTRL NO)$/],
+ ['icn',/^(PAYER CLAIM CONTROL( NUMBER| #| NO)?|PAYER CLAIM( ID| #| NUMBER)?|ICN|CLAIM CONTROL( NUMBER| #)?|CLAIM( #| NUMBER| NO| ID)|TCN|DCN|PAYER ICN)$/],
+ ['status',/^(CLAIM STATUS( DESCRIPTION)?|STATUS)$/],
+ ['dos',/^(SERVICE DATES?|DATES? OF SERVICE|DOS|FROM DATE|SERVICE FROM|LINE SERVICE DATE|SERVICE PERIOD|SERVICE DATE S)$/],
+ ['cpt',/^(PROCEDURE( CODE)?|CPT( CODE)?|HCPCS( CODE)?|SERVICE CODE|PROC( CODE)?|LINE PROCEDURE|PROCEDURE ?\/ ?MODIFIERS?|PROCEDURE CODE ?\/ ?MODIFIERS?)$/],
+ ['mod',/^(MODIFIERS?|MOD)$/],
+ ['units',/^(UNITS|SERVICE UNITS|QUANTITY|UNITS PAID|PAID UNITS)$/],
+ ['billed',/^(BILLED( AMOUNT)?|CHARGE( AMOUNT)?|SUBMITTED( CHARGE| AMOUNT)?|TOTAL CHARGES?|LINE CHARGE|BILLED CHARGE)$/],
+ ['allowed',/^(ALLOWED( AMOUNT)?|ALLOWABLE)$/],
+ ['paid',/^(PAID( AMOUNT)?|PAYMENT( AMOUNT)?|LINE PAID|PROVIDER PAID|NET PAID|PLAN PAID|AMOUNT PAID)$/],
+ ['deduct',/^(DEDUCTIBLE( AMOUNT)?)$/],['coins',/^(COINSURANCE( AMOUNT)?)$/],['copay',/^(COPAY(MENT)?( AMOUNT)?)$/],
+ ['ptResp',/^(PATIENT RESPONSIBILITY|PT RESP(ONSIBILITY)?|MEMBER RESPONSIBILITY)$/],
+ ['adj',/^(ADJUSTMENTS?( REASON)?( CODES?)?|GROUP ?\/ ?REASON( CODES?)?|CARCS?|REASON CODES?|ADJUSTMENT GROUP( CODE)?|CLAIM ADJUSTMENTS?|DENIAL REASON|ADJUSTMENT REASON CODES?)$/],
+ ['rarc',/^(REMARK( CODES?)?|RARCS?|REMARKS)$/],
+ ['dx',/^(DIAGNOSIS( CODES?)?|DX( CODES?)?|ICD( 10)?( CODES?)?)$/]];
+const KV_EXTRA=[
+ ['patient',/^(PT|PATIENT ?\/ ?MEMBER|CLIENT|PATIENT NAME LAST FIRST)$/],
+ ['acct',/^(ACCT( #| NO)?|ACCOUNT NO|PT ACCT( #)?|PAT ACCT( #)?|CHART( #| NO)?|MRN|ENCOUNTER( #| ID| NO)?|VISIT( #| ID)?|CLAIM ID ?\(PROVIDER\))$/],
+ ['icn',/^(PAYER CLAIM #|PAYER REF( #| NUMBER)?|CLAIM REF( #)?|ORIGINAL REF( #)?|CCN|CLAIM CTRL( #| NO)?|PAYER CONTROL( #| NUMBER)?)$/],
+ ['paid',/^(INS PAID|INSURANCE PAID|PMT|PAYMENT AMT|PD|PAID AMT|PAYER PAID)$/],
+ ['billed',/^(CHG|CHG AMT|FEE|CHARGES|BILLED AMT)$/],
+ ['allowed',/^(ALLWD|ALLOWED AMT)$/],
+ ['cpt',/^(CPT ?4|ITEM( CODE)?|BILLING CODE|SVC CODE|CHARGE CODE)$/],
+ ['dos',/^(SVC DATE|SVC DT|DT OF SVC|VISIT DATE|ENCOUNTER DATE|DOS FROM)$/],
+ ['adj',/^(KICK( CODES?| REASONS?)?|ADJ( CODES?)?|ADJ REASON( CODES?)?|CARC)$/],
+ ['rarc',/^(REMIT CODES?|RARC CODES?|REMARK CD)$/]];
+function kvKind(l){const L=normLab(l);for(const [k,re] of KVRULES)if(re.test(L))return k;for(const [k,re] of KV_EXTRA)if(re.test(L))return k;return null}
+function kvPairs(txt){const marks=[];const re=/\s*:/g;let m;
+  while((m=re.exec(txt))){const before=txt.slice(0,m.index);if(/\d$/.test(before)||/(?:^|\s)(HC|AD|NU|IV|ZZ|N4|ER|WK)$/i.test(before))continue;
+    const toks=[...before.matchAll(/\S+/g)];if(!toks.length)continue;let st=toks[toks.length-1].index,kind=null;
+    for(let n=Math.min(5,toks.length);n>=1;n--){const s0=toks[toks.length-n].index;const k=kvKind(before.slice(s0));if(k){st=s0;kind=k;break}}
+    marks.push({st,en:m.index+m[0].length,kind})}
+  const out=[];for(let i=0;i<marks.length;i++){const mk=marks[i];if(!mk.kind)continue;const v=txt.slice(mk.en,i+1<marks.length?marks[i+1].st:txt.length).trim();if(v)out.push([mk.kind,v])}
+  if(!out.length){const seg=txt.split(/\s{3,}|\t/).map(s=>s.trim()).filter(Boolean);for(let i=0;i+1<seg.length;i++){const k=kvKind(seg[i]);if(k){out.push([k,seg[i+1]]);i++}}}
+  return out}
+function parseKV(rows,src,fullText){const out=[];const text=fullText||rows.map(r=>r.text).join('\n');const payer=detectPayer(text);const hf=headerFacts(text);
+  let cl={},ln={};const blank=()=>({});
+  const push=()=>{if(ln.cpt&&(ln.billed!=null||ln.paid!=null)){const k=codesIn([ln.adj,ln.rarc].filter(Boolean).join(' '));
+      out.push({src,payer,check:hf.check,checkDate:hf.checkDate,patient:cl.patient||'',memberId:cl.memberId||'',acct:cl.acct||'',icn:cl.icn||'',claimStatus:cl.status||'',dosFrom:ln.dos?ln.dos[0]:(cl.dos?cl.dos[0]:''),dosTo:ln.dos?(ln.dos[1]||ln.dos[0]):(cl.dos?(cl.dos[1]||cl.dos[0]):''),
+        cpt:ln.cpt,mod:(ln.mods||[]).join(' '),units:ln.units||'',dx:cl.dx||'',billed:ln.billed!=null?ln.billed:null,allowed:ln.allowed!=null?ln.allowed:null,paid:ln.paid!=null?ln.paid:null,
+        ptResp:ln.ptResp!=null?ln.ptResp:([ln.deduct,ln.coins,ln.copay].some(v=>v!=null)?(ln.deduct||0)+(ln.coins||0)+(ln.copay||0):null),adj:k.a.join(', '),rarc:k.r.join(', '),raw:ln.raw||''})}ln=blank()};
+  for(const row of rows){const txt=row.text||rowText(row.words);for(const [k,v] of kvPairs(txt)){
+    if(k==='patient'){const n=cleanName(v);if(n&&n.length>2&&!NOT_PT.test(n)){push();cl={patient:n}}continue}
+    if(k==='memberId'||k==='acct'||k==='icn'||k==='status'){if(k==='icn'&&cl.icn&&cl.icn!==v.split(/\s+/)[0]&&ln.cpt){push()}cl[k]=v.split(/\s{2,}/)[0].trim();continue}
+    if(k==='dx'){cl.dx=parseDx(v).join(', ');continue}
+    if(k==='cpt'){const cp=cptFrom(v);if(!cp)continue;if(ln.cpt)push();else{['billed','allowed','paid','deduct','coins','copay','ptResp'].forEach(x=>delete ln[x])}ln.cpt=cp.cpt;ln.mods=cp.mods;ln.raw=txt;continue}
+    if(k==='mod'){ln.mods=(ln.mods||[]).concat(v.toUpperCase().split(/[\s,:]+/).filter(x=>/^[A-Z0-9]{2}$/.test(x)));continue}
+    if(k==='dos'){const d=datesIn(v);if(d.length){if(ln.cpt||!out.length&&!cl.dos)ln.dos=d;if(!cl.dos)cl.dos=d}continue}
+    if(k==='units'){ln.units=v.split(/\s+/)[0];continue}
+    if(['billed','allowed','paid','deduct','coins','copay','ptResp'].includes(k)){const n2=firstMoney(v);if(n2!=null)ln[k]=n2;continue}
+    if(k==='adj'||k==='rarc'){ln[k]=(ln[k]?ln[k]+' ':'')+v;continue}}}
+  push();if(out.length&&hf.paidTotal!=null)out.recon={billed:null,paid:hf.paidTotal};return out}
+
+/* ===== v4: dedicated readers for printouts the generic column detector mis-read =====
+   Each reader is gated by a strict signature, runs inside try/catch and only returns lines when it
+   finds real service lines; otherwise parseDoc falls through to the original readers unchanged. */
+const mdyF=s=>{const m=String(s||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);if(!m)return'';let y=m[3];if(y.length===2)y='20'+y;return m[1].padStart(2,'0')+'/'+m[2].padStart(2,'0')+'/'+y};
+const tcase=s=>String(s||'').toLowerCase().replace(/(^|[\s\-'])([a-z])/g,(a,b,c)=>b+c.toUpperCase());
+const fixCase=s=>s&&s===s.toLowerCase()?tcase(s):s;
+const flipName=s=>{s=String(s||'').trim().replace(/\s+/g,' ');if(!s||s.indexOf(',')>=0)return s;const p=s.split(' ');if(p.length<2)return s;const last=p.pop();return last+', '+p.join(' ')};
+const uniq=a=>[...new Set(a.filter(Boolean))];
+const isMon=t=>/^-?\$?-?[\d,]*\d\.\d{2}$/.test(t);
+const CPT_TOK=/^(\d{4}[0-9FTU]|[A-V]\d{4})$/;
+const RARC_TOK=/^(MA\d{2,3}|M\d{1,3}|N\d{1,3})$/;
+const fmtAdj=(g,a)=>g+(a!=null?' '+money(a):'');
+const mk=(o)=>Object.assign({dx:'',claimStatus:'',acct:'',memberId:'',icn:'',allowed:null,ptResp:null,adj:'',rarc:'',units:'',mod:'',dosTo:''},o);
+
+/* --- NYSDOH Medicaid "Explanation of Benefits" printed from Caretracker --- */
+function parseNYSDOH(text,src){
+  const out=[];const T=text.replace(/\$\s+/g,'$');
+  const payer=((T.match(/Payer:\s*(.+?)\s+EFT Trace/)||[])[1]||'NYSDOH').trim();
+  const check=(T.match(/Check\s*#:\s*(\S+)/)||[])[1]||'';
+  const cd=mdyF((T.match(/Check Date\s+(\d{1,2}\/\d{1,2}\/\d{4})/)||[])[1]);
+  const eft=num((T.match(/EFT Payment Amount\s*(-?\$[\d,]+\.\d{2})/)||[])[1]);
+  const chunks=T.split(/(?=Patient Name:\s)/).filter(c=>/^Patient Name:/.test(c));
+  for(const c of chunks){
+    const fd=c.search(/\d{2}\/\d{2}\/\d{4}\s*-\s*\d{2}\/\d{2}\/\d{4}/);if(fd<0)continue;
+    const acct=(c.match(/Patient Account #:\s*(\S+)/)||[])[1]||'';
+    const mid=(c.match(/Member ID:\s*(\S+)/)||[])[1]||'';
+    const icn=(c.match(/Claim ID:\s*(\d+)/)||[])[1]||'';
+    const U=((c.match(/^Patient Name:\s*((?:[A-Z][A-Z.'\-]*(?:\s+|$))+)/)||[])[1]||'').trim();
+    const head=c.slice(0,fd).replace(/Claim, Service \/ Line Level and Adjustment Information|Service \/ Line Level and Adjustment Information|Claim Information|Patient Name:|Patient Account #:\s*\S+|Member ID:\s*\S+|Claim ID:\s*\d+|Service \/ Line Level Information|DOS\s+PL\s+Code\s+Units\s+Charges\s+Adjustments\s+Co-Pay\s+Deductible\s+Co-Ins\s+Patient\s+Ins\.\s*Paid\s+Remarks/g,' ').replace(/\s+/g,' ').trim();
+    const rest=(U&&head.indexOf(U)>=0?head.replace(U,' '):head).replace(/\s+/g,' ').trim();
+    const patient=fixCase(/^[A-Za-z][A-Za-z.'\- ]*,\s*[A-Za-z][A-Za-z.'\- ]*$/.test(rest)?rest:(U||rest));
+    const te=c.search(/\bTOTALS\b/);const region=c.slice(fd,te>fd?te:undefined);const tail=te>=0?c.slice(te):'';
+    const det={};const dre=/(\d{5}|[A-V]\d{4})\s+(\d{2}\/\d{2}\/\d{4})\s+Service\s+((?:CO|PR|OA|PI|CR)-\d+)[^$]*?(-?\$-?[\d,]+\.\d{2})/g;let dm;
+    while((dm=dre.exec(tail))){const k=dm[1]+'|'+dm[2];(det[k]=det[k]||[]).push({c:dm[3],a:num(dm[4])})}
+    const tr=uniq([...tail.matchAll(/(?:^|\s)((?:MA\d{2,3}|M\d{1,3}|N\d{1,3}))\s+[A-Z][a-z]/g)].map(x=>x[1]));
+    const ms=[...region.matchAll(/(\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{2}\/\d{2}\/\d{4})/g)];
+    const mine=[];
+    ms.forEach((m,i)=>{
+      const seg=region.slice(m.index+m[0].length,i+1<ms.length?ms[i+1].index:undefined);
+      const toks=seg.trim().split(/\s+/);let ci=-1,sp=null;
+      for(let k=0;k<toks.length;k++){if(CPT_TOK.test(toks[k])){const s=splitProc(toks[k]);if(s){ci=k;sp=s;break}}}
+      if(!sp)return;
+      const mods=sp.mods.slice();
+      for(let k=ci+1;k<toks.length&&mods.length<4;k++){const t=toks[k];if(/^([0-9]{2}|[A-Z]{2}|[A-Z][0-9]|[0-9][A-Z])$/.test(t)&&!/^(CO|PR|OA|PI|CR)$/.test(t))mods.push(t);else break}
+      const um=seg.match(/(?:^|\s)(\d+\.\d{2})(?=\s|$)/);
+      const ci2=seg.search(/\b(CO|PR|OA|PI|CR)-\d+/);
+      const A=s=>(s.match(/-?\$-?\d[\d,]*\.\d{2}/g)||[]).map(num);
+      const pre=ci2>=0?A(seg.slice(0,ci2)):A(seg),after=ci2>=0?A(seg.slice(ci2)):[];
+      let core,adjAmt;
+      if(after.length>=6){core=after.slice(0,5);adjAmt=after[after.length-1]}else{core=after.slice(-5);adjAmt=pre.length>1?pre[1]:null}
+      const billed=pre.length?pre[0]:null;
+      const paid=core.length===5?core[4]:(after.length?after[after.length-1]:null);
+      const pt=core.length===5?(core[3]?core[3]:(core[0]||0)+(core[1]||0)+(core[2]||0)):null;
+      const dosF=mdyF(m[1]);
+      const dl=det[sp.cpt+'|'+m[1]];
+      const codes=uniq([...seg.matchAll(/\b(CO|PR|OA|PI|CR)-(\d+)/g)].map(x=>x[1]+'-'+x[2]));
+      const adj=dl?dl.map(x=>fmtAdj(x.c,x.a)).join(', '):codes.join(', ')+(adjAmt!=null&&codes.length===1?' '+money(adjAmt):'');
+      const co45=dl?dl.filter(x=>x.c==='CO-45'):[];
+      const allowed=co45.length&&billed!=null?Math.round((billed-co45.reduce((t,x)=>t+(x.a||0),0))*100)/100:null;
+      mine.push(mk({src,payer,check,checkDate:cd,patient,memberId:mid,acct,icn,dosFrom:dosF,dosTo:mdyF(m[2])||dosF,cpt:sp.cpt,mod:mods.join(' '),units:um?String(parseFloat(um[1])):'',billed,allowed,paid,ptResp:pt,adj,rarc:uniq(toks.filter(t=>RARC_TOK.test(t))).join(', '),raw:seg.trim()}));
+    });
+    if(mine.length===1&&!mine[0].rarc&&tr.length)mine[0].rarc=tr.join(', ');
+    mine.forEach(o=>out.push(o));
+  }
+  if(out.length&&eft!=null)out.recon={billed:null,paid:eft};
+  return out}
+
+/* --- CollaborateMD "Provider Remittance Data" (Aetna / Wellpoint …) --- */
+function parseCMD(text,src){
+  const out=[];const L=text.split(/\r?\n/);
+  const pr=(text.match(/^\s*(.+?)\s+PROVIDER REMITTANCE DATA/m)||[])[1]||'';
+  const payer=pr?tcase(pr.replace(/^\s*PAGE:\s*\d+\s*/i,'').trim()):'Aetna';
+  const check=(text.match(/CHECK\/EFT\s*#:\s*(\S+)/)||[])[1]||'';
+  const t2=text.slice(Math.max(0,text.indexOf('REMITTANCE NOTICE')));
+  const cd=mdyF((t2.match(/(?<!REPORT\s)(?<!PRINT\s)\bDATE:\s*(\d{1,2}\/\d{1,2}\/\d{4})/)||[])[1]);
+  let cl=null,last=null;
+  const fin=()=>{if(!cl)return;for(const o of cl.lines){const prs=o._pr;o.ptResp=prs.length?prs.reduce((a,b)=>a+b,0):((o._ded||0)+(o._coins||0))||null;
+      o.rarc=uniq(o._rarc.concat(cl.rem)).join(', ');o.claimStatus=cl.status?(cl.status+' - '+(STATUS_TXT[cl.status]||'')):'';
+      o.adj=o._adj.map(a=>fmtAdj(a.g,a.a)).join(', ');['_pr','_ded','_coins','_rarc','_adj'].forEach(k=>delete o[k]);out.push(o)}cl=null;last=null};
+  for(const raw of L){const s=raw.trim();if(!s)continue;let m;
+    if(/^TOTALS:/.test(s)||/^GLOSSARY:/.test(s)){fin();continue}
+    if((m=s.match(/^NAME\s+(.+?)\s+HIC\s+(\S+)\s+TCN\s+(\S+)\s+ICN\s+(\S+)\s*(.*)$/))){fin();cl={patient:m[1].trim(),mid:m[2],icn:m[4],rem:(m[5].match(/\b(MA\d{2,3}|M\d{1,3}|N\d{1,3})\b/g)||[]),lines:[],status:''};continue}
+    if(!cl)continue;
+    if((m=s.match(/^(\d{4})\s+(\d{6})\s+(\d+)\s+(\S+)\s+(.+)$/))&&CPT_TOK.test(m[4].toUpperCase())){
+      const toks=m[5].trim().split(/\s+/);let i=0;const mods=[];
+      while(i<toks.length&&!isMon(toks[i])&&mods.length<4){mods.push(toks[i]);i++}
+      const n=toks.slice(i);if(n.length<5)continue;
+      const adj=[];let paid;
+      if(/^(CO|PR|OA|PI|CR)-\d+$/.test(n[4])){adj.push({g:n[4],a:num(n[5])});paid=num(n[6])}else paid=num(n[4]);
+      const mm=m[2];const o=mk({src,payer,check,checkDate:cd,patient:cl.patient,memberId:cl.mid,icn:cl.icn,dosFrom:mm.slice(0,2)+'/'+mm.slice(2,4)+'/20'+mm.slice(4,6),cpt:m[4].toUpperCase(),mod:mods.join(' '),units:String(parseInt(m[3],10)),billed:num(n[0]),allowed:num(n[1]),paid,raw:s});
+      o.dosTo=o.dosFrom;o._ded=num(n[2]);o._coins=num(n[3]);o._pr=[];o._rarc=[];o._adj=adj;
+      adj.forEach(a=>{if(a.g.startsWith('PR-'))o._pr.push(a.a||0)});
+      cl.lines.push(o);last=o;continue}
+    if(last&&(m=s.match(/^((?:CO|PR|OA|PI|CR)-\d+)\s+(-?[\d,]+\.\d{2})\s*$/))){const a=num(m[2]);last._adj.push({g:m[1],a});if(m[1].startsWith('PR-'))last._pr.push(a||0);continue}
+    if(last&&(m=s.match(/REM:\s*(.+)$/))){last._rarc=last._rarc.concat(m[1].match(/\b(MA\d{2,3}|M\d{1,3}|N\d{1,3})\b/g)||[]);continue}
+    if((m=s.match(/CLM REMARK:\s*(.+)$/))){cl.rem=cl.rem.concat(m[1].match(/\b(MA\d{2,3}|M\d{1,3}|N\d{1,3})\b/g)||[]);continue}
+    if((m=s.match(/PT RESP\s+(-?[\d,]+\.\d{2})\s+CLM STATUS\s+(\d+)/))){cl.status=m[2];fin();continue}
+  }
+  fin();
+  const tm=text.match(/TOTALS:[\s\S]*?\n\s*\d+\s+((?:-?[\d,]+\.\d{2}\s*){5,})/);
+  if(out.length&&tm){const nn=tm[1].trim().split(/\s+/).map(num);out.recon={billed:null,paid:nn[nn.length-1]}}
+  return out}
+
+/* --- EasyPrint Medicare remittance advice (e.g. AL BCBS Medicare) --- */
+function parseEasyPrint(text,src){
+  const out=[];const L=text.split(/\r?\n/);
+  const payer=(text.match(/^\s*([A-Z][A-Z0-9 &.\-]*?MEDICARE)\s*$/m)||[])[1]||detectPayer(text)||'Medicare';
+  const check=(text.match(/CHECK\/EFT\s*#:\s*(\d+)/)||[])[1]||'';
+  const cd=mdyF((text.match(/(?:^|\s)DATE:\s*(\d{1,2}\/\d{1,2}\/\d{4})/m)||text.match(/CHECK\/EFT\s*#:\s*\d+\s+(\d{1,2}\/\d{1,2}\/\d{4})/)||[])[1]);
+  const MN='(-?[\\d,]+\\.\\d{2})';
+  const sre=new RegExp('^(\\d{10})\\s+(\\d{4})\\s+(\\d{6})\\s+(?:\\d{2}\\s+)?(\\S+)\\s+(\\d+(?:\\.\\d+)?)\\s+'+MN+'\\s+'+MN+'\\s+'+MN+'\\s+'+MN+'\\s+'+MN);
+  let cl=null,last=null;const lines=[];
+  const fin=()=>{for(const o of lines){o.ptResp=o._pr.length?o._pr.reduce((a,b)=>a+b,0):((o._ded||0)+(o._coins||0))||null;o.adj=o._adj.map(a=>fmtAdj(a.g,a.a)).join(', ');o.rarc=uniq(o._rarc).join(', ');['_pr','_ded','_coins','_rarc','_adj'].forEach(k=>delete o[k]);out.push(o)}lines.length=0;last=null};
+  for(const raw of L){const s=raw.trim();if(!s||/^_+$/.test(s))continue;let m;
+    if((m=s.match(/NAME:\s*(.+?)\s+HIC:\s*(\S+)\s+ACNT:\s*((?!ICN:)\S*)\s*ICN:\s*(\S+)/))){fin();cl={patient:m[1].trim(),mid:m[2],acct:m[3],icn:m[4]};continue}
+    if(!cl)continue;
+    if((m=s.match(sre))){const sp=splitProc(m[4]);if(!sp)continue;const mm=m[3];
+      const o=mk({src,payer,check,checkDate:cd,patient:cl.patient,memberId:cl.mid,acct:cl.acct,icn:cl.icn,dosFrom:mm.slice(0,2)+'/'+mm.slice(2,4)+'/20'+mm.slice(4,6),cpt:sp.cpt,mod:sp.mods.join(' '),units:String(parseFloat(m[5])),billed:num(m[6]),allowed:num(m[7]),paid:num(m[10]),raw:s});
+      o.dosTo=o.dosFrom;o._ded=num(m[8]);o._coins=num(m[9]);o._pr=[];o._rarc=[];o._adj=[];lines.push(o);last=o;continue}
+    if(!last||/^(PT RESP|ADJ TO TOTALS|REND-PROV|RARC\s+SUB-NOS|OTHER CLAIM|AL BCBS|NPI #|CHECK\/EFT)/i.test(s))continue;
+    const re=/\b(CO|PR|OA|PI|CR)-(\d{1,3})\s+(-?[\d,]+\.\d{2})/g;let a;
+    while((a=re.exec(s))){const v=num(a[3]);last._adj.push({g:a[1]+'-'+a[2],a:v});if(a[1]==='PR')last._pr.push(v||0)}
+    const rr=/(?:^|\s)((?:MA\d{2,3}|M\d{1,3}|N\d{1,3}))(?=\s+(?:CO|PR|OA|PI|CR)-)/g;let r;while((r=rr.exec(s)))last._rarc.push(r[1]);
+  }
+  fin();return out}
+
+/* --- ECHO / EPC statements (Luminare Health, UMWA / HealthSmart …) --- */
+function parseEPC(text,src){
+  const out=[];const L=text.split(/\r?\n/);const umwa=/Payor Claim #:/.test(text);
+  const first=(L.find(x=>x.trim())||'').trim();
+  const payer=/^[A-Za-z][A-Za-z &.,]{3,60}$/.test(first)?first:(umwa?'UMWA Health and Retirement Funds':'Luminare Health');
+  let check=(text.match(/EPC Draft #:\s*(\S+)/)||[])[1]||'';if(check==='0')check='';
+  const cd=mdyF((text.match(/Payment Date:\s*(\d{1,2}\/\d{1,2}\/\d{4})/)||[])[1]);
+  let ctx={};
+  const need=umwa?11:9;
+  for(const raw of L){const s=raw.trim();if(!s)continue;let m;
+    if((m=s.match(/(?:^|\s)Payor Claim #:\s*(\S+)/))||(!umwa&&(m=s.match(/^Claim #:\s*(\S+)/)))){ctx={icn:m[1],patient:'',mid:'',acct:''};continue}
+    if((m=s.match(/(?:Beneficiary #|Member\/Patient ID):\s*(\S+)/))){ctx.mid=m[1]}
+    if(umwa&&(m=s.match(/^Patient:\s*(.+)$/)))ctx.patient=flipName(m[1].trim());
+    if(!umwa&&(m=s.match(/Patient Name:\s*(.+)$/)))ctx.patient=flipName(m[1].trim());
+    if((m=s.match(/Patient Acct #:\s*(\S+)/)))ctx.acct=m[1];
+    if((m=s.match(/^(\d{2}\/\d{2}\/\d{2})\s+(\S+)\s+(.+)$/))&&ctx.icn!=null){
+      const toks=m[3].trim().split(/\s+/);const nums=[];while(toks.length&&isMon(toks[toks.length-1])){nums.unshift(toks.pop())}
+      if(nums.length<need)continue;const n=nums.slice(-need).map(num);const pre=toks.concat(nums.slice(0,nums.length-need));
+      const cm=m[2].match(/^([A-Z0-9]{5})(?:\((.*?)\))?$/i);if(!cm||!splitProc(cm[1]))continue;
+      const mods=(cm[2]||'').split(/[,\s]+/).filter(Boolean);const d=mdyF(m[1]);
+      let o;
+      if(!umwa){const ex=pre.join(' ');const dis=n[1],cop=n[5],ded=n[6],coi=n[7];
+        const adj=[];if(ex)adj.push('EX '+ex);if(dis)adj.push('Provider discount '+money(dis));if(n[2])adj.push('Other plan '+money(n[2]));if(n[3])adj.push('Other adj '+money(n[3]));if(n[4])adj.push('Ineligible '+money(n[4]));
+        o=mk({src,payer,check,checkDate:cd,patient:ctx.patient,memberId:ctx.mid,acct:ctx.acct,icn:ctx.icn,dosFrom:d,dosTo:d,cpt:cm[1].toUpperCase(),mod:mods.join(' '),units:'',billed:n[0],allowed:Math.round((n[0]-dis)*100)/100,paid:n[8],ptResp:(cop+ded+coi)||null,adj:adj.join(' · '),raw:s})}
+      else{const units=pre[0]||'';const ex=pre.slice(1).join(' ');const adj=[];if(ex)adj.push('EX '+ex);if(n[4])adj.push('Other adj '+money(n[4]));if(n[3])adj.push('Other plan '+money(n[3]));
+        o=mk({src,payer,check,checkDate:cd,patient:ctx.patient,memberId:ctx.mid,acct:ctx.acct,icn:ctx.icn,dosFrom:d,dosTo:d,cpt:cm[1].toUpperCase(),mod:mods.join(' '),units:String(parseInt(units,10)||''),billed:n[0],paid:n[9],ptResp:(n[5]+n[6]+n[7])||null,adj:adj.join(' · '),raw:s})}
+      out.push(o)}
+  }
+  if(!umwa){const sm=[...L].reverse().map(x=>x.trim()).find(x=>/^[A-Za-z][A-Za-z ]+(?:\s+-?[\d,]+\.\d{2}){9}\s*$/.test(x));
+    if(sm&&out.length){const nn=sm.match(/-?[\d,]+\.\d{2}/g).map(num);out.recon={billed:null,paid:nn[nn.length-1]}}}
+  return out}
+
+/* --- Ambetter "Explanation of Payment" (stacked cells; all values read as one token stream per service) --- */
+function parseAmbetter(text,src){
+  const out=[];const T=text.replace(/\s+/g,' ');
+  const check=(T.match(/Check\/ACH#:\s*(\S+)/)||[])[1]||'';
+  const cd=mdyF((T.match(/Payment Date:\s*(\S+)/)||[])[1]);
+  const payer=(T.match(/(Ambetter[A-Za-z ]*?(?:Inc\.?|LLC))/)||[])[1]||'Ambetter';
+  const payAmt=num((T.match(/Payment Amt:\s*(-?\$[\d,.]+)/)||[])[1]);
+  const cls=T.split(/(?=Insured Name:)/).filter(c=>/^Insured Name:/.test(c));
+  for(const c of cls){
+    const mbr=(c.match(/Mbr No:\s*(\S+)/)||[])[1]||'';
+    const icn=(c.match(/Claim\/Ctrl No:\s*(\S+)/)||[])[1]||'';
+    const pn=((c.match(/Patient Name:\s*(.+?)\s+(?:SvcProv|Carrier|PatCtrlNo)/)||[])[1]||'').trim();
+    const acct=(c.match(/PatCtrlNo:\s*(\S+)/)||[])[1]||'';
+    const sre=/(?:^|\s)(0[12]00)\s+(\d{1,2}\/\d{1,2}\/\d{4})\s+/g;const ms=[...c.matchAll(sre)];
+    ms.forEach((m,i)=>{
+      let b=c.slice(m.index+m[0].length,i+1<ms.length?ms[i+1].index:undefined);const cut=b.search(/Sub-total|TOTAL\s*\$|Insured Name:/);if(cut>=0)b=b.slice(0,cut);
+      const bm=b.match(/^([A-Z0-9]{5})(?:\/\s*([A-Z0-9]{2}))?\s+([A-Z0-9]{5})(?:\/\s*([A-Z0-9]{2}))?\s+(\d+)\s+(.*)$/);if(!bm)return;
+      const sp=splitProc(bm[1]);if(!sp)return;const mod=(bm[2]||bm[4]||'');
+      const A=(bm[6].match(/-?\$-?[\d,]+\.\d{2}/g)||[]).map(num);if(!A.length)return;
+      const ad=bm[6].match(/\b(CO|PR|OA|PI|CR)\s+(\d{1,3})\b/);
+      const paid=payAmt===0?0:A[A.length-1];
+      const den=A.length>=15?A[A.length-3]:(paid===0?A[0]:null);
+      out.push(mk({src,payer,check,checkDate:cd,patient:pn,memberId:mbr,acct,icn,dosFrom:mdyF(m[2]),dosTo:mdyF(m[2]),cpt:sp.cpt,mod:mod,units:bm[5],billed:A[0],allowed:A.length>1?A[1]:null,paid,adj:ad?fmtAdj(ad[1]+'-'+ad[2],den):'',raw:b.trim()}))});
+  }
+  if(out.length&&payAmt!=null)out.recon={billed:null,paid:payAmt};
+  return out}
+
+/* --- UnitedHealthcare Community Plan "Provider Remittance Advice" (blank cells collapse – amounts read from the right) --- */
+function parseUHCCP(text,src){
+  const out=[];const T=text.replace(/\s+/g,' ');
+  const check=(T.match(/PAYMENT NUMBER:\s*(\S+)/)||[])[1]||'';
+  const cd=mdyF((T.match(/PAYMENT DATE:\s*(\S+)/)||[])[1]);
+  const payer=(T.match(/(UnitedHealthcare Community Plan of [A-Z][a-z]+(?: [A-Z][a-z]+)?)/)||[])[1]||'UnitedHealthcare Community Plan';
+  const total=num((T.match(/PAYMENT AMOUNT:\s*(-?\$[\d,.]+)/)||[])[1]);
+  let pat='',mid='',acct='';
+  const parts=T.split(/(?=PATIENT:\s|SUBSCRIBER ID:)/);
+  for(const p of parts){let m;
+    if((m=p.match(/^PATIENT:\s*(.+?)(?=\s+(?:SUBSCRIBER|MEMBER ID|SERVICING|INTEREST|PCP|CLAIM NUMBER|PATIENT ACCOUNT)|$)/)))pat=flipName(m[1].trim());
+    if((m=p.match(/MEMBER ID:\s*(\S+)/)))mid=m[1];
+    if((m=p.match(/PATIENT ACCOUNT:\s*(\S+)/)))acct=m[1];
+    const cn=(p.match(/CLAIM NUMBER:\s*(\S+)/)||[])[1]||'';
+    const rev=/THIS IS A REVERSAL/.test(p);
+    const re=/(\d{2}\/\d{2}\/\d{2})\s*-?\s*(\d{2}\/\d{2}\/\d{2})?\s*([A-Z0-9]{5})((?:\s+[A-Z0-9]{2})*?)\s+POS\/\s*Bill Type\s+\d+\s+(\d+)\s+((?:-?\$-?[\d,]+\.\d{2}\s*)+)(.*?)(?=\s(?:CLAIM NUMBER:|SUBTOTAL)|$)/g;let r;
+    while((r=re.exec(p))){const sp=splitProc(r[3]);if(!sp)continue;
+      const a=r[6].match(/-?\$-?[\d,]+\.\d{2}/g).map(num);const N=a.length;
+      const mods=sp.mods.concat((r[4].match(/[A-Z0-9]{2}/g)||[]));
+      const tail=r[7];const ad=tail.match(/\b(CO|PR|OA|PI|CR)\s*(\d{1,3})\b/);
+      const dos=mdyF(r[1]);
+      out.push(mk({src,payer,check,checkDate:cd,patient:pat,memberId:mid,acct,icn:cn,claimStatus:(rev||a[0]<0)?'Reversal of previous payment':'',dosFrom:dos,dosTo:mdyF(r[2])||dos,cpt:sp.cpt,mod:mods.join(' '),units:r[5],billed:a[0],allowed:N>=9?a[2]:null,paid:N>=2?a[N-2]:null,ptResp:N>=2?a[N-1]:null,adj:ad?ad[1]+'-'+ad[2]:'',rarc:uniq((tail.match(/\b(MA\d{2,3}|M\d{1,3}|N\d{1,3})\b/g)||[])).join(', '),raw:r[0].trim()}))}
+  }
+  if(out.length&&total!=null)out.recon={billed:null,paid:total};
+  return out}
+
+/* --- Palmetto GBA "Explanation of Benefits" (one claim per page) --- */
+function parsePalmetto(text,src){
+  const out=[];const T=text.replace(/\s+/g,' ');
+  const hm=T.match(/Check No:\s*Check Amount:\s*Date:\s*(\S+)\s+(-?[\d,.]+)\s+(\d{1,2}\/\d{1,2}\/\d{4})/)||[];
+  const check=hm[1]||(T.match(/Check No:\s*(\d{5,})/)||[])[1]||'';
+  const cAmt=hm[2]!=null?num(hm[2]):null;const cd=mdyF(hm[3]||'');
+  const chunks=T.split(/(?=Insurance ID:)/).filter(c=>/^Insurance ID:/.test(c));
+  for(const c of chunks){
+    const im=c.match(/Insurance ID:\s*(\S+)\s+(\S+)\s+Payer Control #/)||c.match(/Insurance ID:\s*(\S+)\s+(\S+)/)||[];
+    let icn=im[1]||'',mid=im[2]||'';if(/^\d+$/.test(mid)&&!/^\d+$/.test(icn)){const t=icn;icn=mid;mid=t}
+    const pm=c.match(/([A-Za-z][A-Za-z'\-]*(?: [A-Za-z'\-]+)*,\s*[A-Za-z][A-Za-z'\-. ]*?)\s*\(([^)]+)\)/);
+    const rm=c.match(/Remark Code:\s*((?:(?:MA\d+|M\d+|N\d+)[,\s]*)+)/);
+    const rarc=rm?uniq(rm[1].match(/(?:MA\d+|M\d+|N\d+)/g)||[]).join(', '):'';
+    const re=/(\d{1,2}\/\d{1,2}\/\d{4})\s+(\d{5}|[A-V]\d{4})((?:\s+[A-Z0-9]{1,4})+?)\s+((?:-?[\d,]+\.\d{2}\s+){6})((?:CO|PR|OA|PI|CR)\s+\d+)?(?:\s*-\s*(\$-?[\d,]+\.\d{2}))?/g;let m;
+    while((m=re.exec(c))){const t=m[3].trim().split(/\s+/);if(t.length<2)continue;const units=t.pop();t.pop();const a=m[4].trim().split(/\s+/).map(num);
+      const g=m[5]?m[5].replace(/\s+/,'-'):'';const dos=mdyF(m[1]);
+      out.push(mk({src,payer:'Palmetto GBA',check,checkDate:cd,patient:pm?pm[1].trim():'',memberId:mid,acct:pm?pm[2]:'',icn,dosFrom:dos,dosTo:dos,cpt:m[2],mod:t.join(' '),units,billed:a[0],allowed:a[1],paid:a[2],ptResp:a[4]||a[3]||null,adj:g?(g+(m[6]?' '+money(num(m[6])):(a[5]?' '+money(a[5]):''))):'',rarc,raw:m[0].trim()}))}
+  }
+  if(out.length&&cAmt!=null)out.recon={billed:null,paid:cAmt};
+  return out}
+
+/* --- Tebra / clearinghouse "Electronic Remittance Advice (X12/835)" browser print (BCBS KC …) --- */
+function parseBCBSKC(text,src){
+  const out=[];const T=text.replace(/\s+/g,' ');
+  const check=(T.match(/Check ID:\s*(\S+)/)||[])[1]||'';
+  const cd=mdyF((T.match(/Check ID:\s*\S+\s+Date:\s*(\d{1,2}\/\d{1,2}\/\d{4})/)||[])[1]);
+  const total=num((T.match(/Total Actual Provider Payment Amount:\s*(-?\$[\d,.]+)/)||[])[1]);
+  const payer=((T.match(/Name:\s*(.+?)(?=\s+Name:|\s+Identifier:|\s+Address:)/)||[])[1]||'').trim();
+  const cls=T.split(/(?=Claim Reference ID:)/).filter(c=>/^Claim Reference ID:/.test(c));
+  for(const c of cls){
+    const st=c.match(/Status:\s*(\d+)\s*\(\s*([^)]*?)\s*\)/);
+    const icn=(c.match(/Payer Claim Control Number:\s*(\S+)/)||c.match(/Claim Reference ID:\s*(\S+)/)||[])[1]||'';
+    const pn=((c.match(/Patient Name:\s*(.+?)\s+(?:Patient ID:|Corrected)/)||[])[1]||'').trim();
+    const pid=c.match(/Patient ID:\s*(\S+)\s*\(([^)]*)\)/);const cid=(c.match(/Corrected Patient\/Insured ID:\s*(\S+)/)||[])[1]||'';
+    const mid=pid?((/Social/i.test(pid[2])&&cid)?cid:pid[1]):cid;
+    const re=/(\d{3,})\s+(\d{2}\/\d{2}\/\d{4})\s+([A-Z0-9]{5})(?:[:\-]\s*([A-Z0-9]{2}))?\s*\/\s*(\d+(?:\.\d+)?)\s+(\$-?[\d,]+\.\d{2})\s*\/\s*(\$-?[\d,]+\.\d{2})\s+(\$-?[\d,]+\.\d{2})\s*\/\s*((?:CO|PR|OA|PI|CR)-\d+)/g;
+    const ms=[...c.matchAll(re)];
+    ms.forEach((m,i)=>{
+      let b=c.slice(m.index,i+1<ms.length?ms[i+1].index:undefined);const cut=b.search(/\sl\s+\d+\s*:|Page \d+ of \d+|about:blank|ClaimID Svc Date/);if(cut>0)b=b.slice(0,cut);
+      const ads=[...b.matchAll(/(\$-?[\d,]+\.\d{2})\s*\/\s*((?:CO|PR|OA|PI|CR)-\d+)/g)].map(x=>({c:x[2],a:num(x[1])}));
+      const cp=b.match(/(?:CO|PR|OA|PI|CR)-\d+\s*\/\s*(\$-?[\d,]+\.\d{2})/);
+      const dl=b.match(/\$-?[\d,]+\.\d{2}/g)||[];const paid=num(dl[dl.length-1]);
+      const pr=ads.filter(x=>x.c.startsWith('PR-')).reduce((t,x)=>t+(x.a||0),0)+(cp?num(cp[1]):0);
+      const d=mdyF(m[2]);
+      out.push(mk({src,payer,check,checkDate:cd,patient:pn,memberId:mid,icn,claimStatus:st?st[1]+' - '+st[2]:'',dosFrom:d,dosTo:d,cpt:m[3],mod:m[4]||'',units:m[5],billed:num(m[6]),allowed:num(m[7]),paid,ptResp:pr||null,adj:ads.map(x=>fmtAdj(x.c,x.a)).join(', '),rarc:uniq([...b.matchAll(/remark\s+((?:MA\d+|M\d+|N\d+))/g)].map(x=>x[1])).join(', '),raw:b.trim()}))});
+  }
+  if(out.length&&total!=null)out.recon={billed:null,paid:total};
+  return out}
+
+function parseDedicated(text,src){
+  const T=String(text||'');const tag=(r,f)=>{r.format=f;return r};
+  const tries=[
+   [/Service\s*\/\s*Line Level Information/i.test(T)&&/Patient Account #/i.test(T)&&/Claim ID:/i.test(T),parseNYSDOH,'NYSDOH EOB (Caretracker)'],
+   [/PROVIDER REMITTANCE DATA/.test(T)&&/SERV DATE\s+UNITS\s+PROC/.test(T),parseCMD,'CollaborateMD provider remittance data'],
+   [/REND-PROV\s+SERV-DATE/.test(T)&&/CHECK\/EFT\s*#/.test(T),parseEasyPrint,'EasyPrint Medicare remittance advice'],
+   [/EPC Draft #/.test(T)&&(/Payor Claim #:/.test(T)||(/Claim #:/.test(T)&&/Statement Summary/.test(T))),parseEPC,'ECHO / EPC statement'],
+   [/EXPLANATION OF PAYMENT/.test(T)&&/Ambetter/i.test(T)&&/Claim\/Ctrl No:/.test(T),parseAmbetter,'Ambetter explanation of payment'],
+   [/PROVIDER REMITTANCE ADVICE/.test(T)&&/PAYMENT NUMBER:/.test(T)&&/CLAIM NUMBER:/.test(T),parseUHCCP,'UHC Community Plan remittance advice'],
+   [/Explanation of Benefits/.test(T)&&/PALMETTO GBA/i.test(T)&&/Claims Total:/.test(T),parsePalmetto,'Palmetto GBA EOB'],
+   [/Electronic Remittance Advice \(X12\/835\)/.test(T)&&/Claim Reference ID:/.test(T),parseBCBSKC,'835 viewer print (Tebra)']];
+  for(const [ok,fn,f] of tries){if(!ok)continue;try{const r=fn(T,src);if(r&&r.length)return tag(r,f)}catch(e){}}
+  return null}
+
+/* ---------- dispatcher: pick the best interpretation ---------- */
+function quality(r){if(!r||!r.length)return -1;let s=0;for(const l of r)s+=(l.cpt?2:0)+(l.billed!=null?1:0)+(l.paid!=null?1:0)+(l.patient?1:0)+(l.dosFrom?0.5:0);
+  if(r.recon&&r.recon.paid!=null){const sp=r.reduce((t,l)=>t+(num(l.paid)||0),0);if(Math.abs(sp-r.recon.paid)<0.01)s+=1000}return s}
+function parseDoc(text,src,rows){const tag=(r,f)=>{r.format=f;return r};text=String(text||'');
+  if(/(^|[\r\n~])\s*ISA[^A-Za-z0-9\s]/.test(text)||(/\bCLP[*|^]/.test(text)&&/\bSVC[*|^]/.test(text))){const r=parse835EDI(text,src);if(r.length)return tag(r,'X12 835 ERA (raw)')}
+  {const dd=parseDedicated(text,src);if(dd&&dd.length)return dd}
+  if(/ELECTRONIC REMITTANCE SUMMARY REPORT/i.test(text)||/YYYYMMDD\s+PT\s+PROC/i.test(text)){const r=parse835Report(text,src);if(r.length)return tag(r,'835 summary report (fixed-width)')}
+  if(/Standard Remittance View|Service Line Information/i.test(text)&&/Proc\s*\/?\s*Rev/i.test(text)){const r=parseGateway(text,src);if(r.length)return tag(r,'TriZetto Gateway EDI remittance')}
+  if(/Check\s*Info\s*:/i.test(text)&&/Claim\s+Patient\s+ID/i.test(text)&&/Adjustment\s+Details/i.test(text)){const r=parseOfficeAlly(text,src,rows);if(r.length)return tag(r,'Office Ally ERA check details')}
+  if(/\b(HC|AD|NU)\s*[:;]\s*[A-Z0-9]{4,5}/i.test(text)&&/Serv\s*Code|Explanation of Payment|eRemittance/i.test(text)){const r=parseECW(text,src);if(r.length)return tag(r,'eClinicalWorks eRemittance')}
+  rows=rows&&rows.length?rows:rowsFromText(text);
+  const cands=[[()=>parseTableRows(rows,src,text),'Auto-detected table columns'],[()=>parseKV(rows,src,text),'Label/value layout (Availity-style)'],[()=>parseTextGeneric(text,src),'Generic text']];
+  let best=null,bs=-1;for(const [fn,f] of cands){let r=[];try{r=fn()}catch(e){r=[]}const s=quality(r);if(s>bs){bs=s;best=tag(r,f)}}
+  return best&&best.length?best:tag([],'Not recognized')}
+/* ===== Billing-system profiles (28 systems) ===== */
+const CH='Clearinghouse / payer portal',PM='Practice management / EHR',DME='DME / HME billing',TH='Therapy / behavioral PM';
+const READ_GEN='Raw 835 (exact) · printed ERA/EOB PDF or scan: auto column + label/value detection · Excel/CSV export: column-name mapping · Teach layout if needed';
+const BEST_CH='Raw 835 / ERA file for the check (exact). The printed remittance PDF also works.';
+const BEST_PM='The original 835/ERA file if the system lets you download it; otherwise the ERA / EOB report saved as a text PDF (not a scan), or the payment/ERA report exported to Excel/CSV.';
+const SYSTEMS=[
+ {id:'advancedmd',name:'AdvancedMD',type:PM,sig:/advanced\s*md|advancedmd\.com/i},
+ {id:'allscripts',name:'Allscripts',type:PM,sig:/allscripts|veradigm/i},
+ {id:'athenanet',name:'AthenaNet',type:PM,sig:/athena\s*net\b|athenanet|athenahealth/i,note:'athena "kick codes" are read as adjustment reasons'},
+ {id:'athenaone',name:'AthenaOne Collector',type:PM,sig:/athena\s*one|athenaone|athena\s*collector|athenacollector/i,note:'athena "kick codes" are read as adjustment reasons'},
+ {id:'availity',name:'Availity',type:CH,sig:/availity/i,read:'Raw 835 (exact) · Remittance Viewer / claim detail pages: label/value reader · table pages: auto columns'},
+ {id:'brightree',name:'Brightree LLC',type:DME,sig:/brightree/i,note:'DME HCPCS (E/K/L/A codes), rental modifiers (RR/NU/UE/KH…) and quantity columns supported'},
+ {id:'centricity',name:'Centricity',type:PM,sig:/centricity|ge\s*healthcare/i},
+ {id:'dmeworks',name:'DME Works',type:DME,sig:/dme\s*works|dmeworks/i,note:'DME HCPCS and rental modifiers supported'},
+ {id:'drchrono',name:'DrChrono',type:PM,sig:/drchrono/i},
+ {id:'ecw',name:'eClinicalWorks',type:PM,sig:/eclinicalworks|ecwcloud|eRemittance/i,read:'Dedicated eRemittance reader (row and column-dump layouts, OCR) · raw 835 (exact)'},
+ {id:'epic',name:'EPIC',type:PM,sig:/\bepic\b|epic\s*systems|resolute\s*(hb|pb)/i},
+ {id:'healthpac',name:'Healthpac',type:PM,sig:/healthpac|835 ELECTRONIC REMITTANCE SUMMARY REPORT/i,read:'Dedicated fixed-width 835 summary report reader (YYYYMMDD / PROC+MODS / AC codes) · raw 835 (exact)'},
+ {id:'medstreaming',name:'Medstreaming',type:PM,sig:/medstreaming/i},
+ {id:'modmed',name:'ModMed',type:PM,sig:/modmed|modernizing\s*medicine/i},
+ {id:'nextgen',name:'NEXGEN',type:PM,sig:/next\s*gen|nextgen/i},
+ {id:'nextech',name:'Nextech',type:PM,sig:/nextech/i},
+ {id:'officeally',name:'Office Ally',type:CH,sig:/office\s*ally|officeally/i,read:'Dedicated "Check Details (Autopost)" reader (claim header + service table + adjustment cells) · raw 835 (exact)'},
+ {id:'pds',name:'PDS MDsuite',type:PM,sig:/md\s*suite|mdsuite|\bpds\b/i},
+ {id:'practicefusion',name:'Practice Fusion',type:PM,sig:/practice\s*fusion/i},
+ {id:'practicelist',name:'Practice List',type:PM,sig:/practice\s*list/i},
+ {id:'practicemate',name:'Practice MATE',type:PM,sig:/practice\s*mate/i},
+ {id:'practicesuite',name:'PracticeSuite',type:PM,sig:/practice\s*suite/i},
+ {id:'tebra',name:'Tebra',type:PM,sig:/tebra|kareo/i},
+ {id:'therapynotes',name:'TherapyNotes',type:TH,sig:/therapy\s*notes/i},
+ {id:'traknet',name:'TRAKnet',type:DME,sig:/traknet/i,note:'DME HCPCS and rental modifiers supported'},
+ {id:'trizetto',name:'Trizetto',type:CH,sig:/trizetto|gateway\s*edi|gatewayedi|Standard Remittance View/i,read:'Dedicated Gateway EDI "Standard Remittance View" reader · raw 835 (exact)'},
+ {id:'waystar',name:'Waystar',type:CH,sig:/waystar|zirmed|navicure/i,read:'Raw 835 (exact) · printed remits (Medicare-style GRP/RC-AMT tables): auto columns'},
+ {id:'webpt',name:'WebPT',type:TH,sig:/\bweb\s*pt\b|webpt/i},
+ {id:'caretracker',name:'Caretracker',type:PM,sig:/caretracker/i,read:'Dedicated NYSDOH EOB reader (DOS range / code+modifier / charges / adjustments / ins. paid, stacked CO/OA rows) · raw 835 (exact)'},
+ {id:'collaboratemd',name:'CollaborateMD (CMD)',type:PM,sig:/collaboratemd|\bcmd\b|PROVIDER REMITTANCE DATA/i,read:'Dedicated "Provider Remittance Data" reader (Aetna / Wellpoint …) · raw 835 (exact)'},
+ {id:'easyprint',name:'EasyPrint',type:PM,sig:/easyprint|REND-PROV\s+SERV-DATE/i,read:'Dedicated Medicare remittance-advice reader (glued CPT+modifier, CO/PR/OA lines) · raw 835 (exact)'},
+ {id:'echo',name:'ECHO (EPC)',type:PM,sig:/\becho\b|EPC Draft #/i,read:'Dedicated EPC statement reader (Luminare Health, UMWA …) · raw 835 (exact)'}];
+const SYS_BY={};SYSTEMS.forEach(s=>{SYS_BY[s.id]=s;s.read=s.read||READ_GEN;s.best=s.type===CH?BEST_CH:BEST_PM});
+const VERIFIED={ecw:'✓ Verified on your eCW eRemittance samples',healthpac:'✓ Verified on your 835 summary report sample',trizetto:'✓ Verified on your Gateway EDI remittance sample'};
+const TESTED={waystar:'Tested on Medicare-style GRP/RC-AMT remit layout',availity:'Tested on Availity label/value layout',officeally:'Built for Office Ally "Check Details (Autopost)" layout (sample-based, not run in a browser)'};
+function detectSystem(text,format,name){const f=format||'';
+  if(/Caretracker/.test(f))return'caretracker';if(/CollaborateMD/.test(f))return'collaboratemd';if(/EasyPrint/.test(f))return'easyprint';if(/ECHO \/ EPC/.test(f))return'echo';if(/Tebra\)/.test(f))return'tebra';
+  if(/eClinicalWorks/.test(f))return'ecw';if(/835 summary report/.test(f))return'healthpac';if(/TriZetto/.test(f))return'trizetto';if(/Office Ally/.test(f))return'officeally';
+  const hay=(name||'')+'\n'+String(text||'').slice(0,20000);
+  for(const s of SYSTEMS){if(['ecw','healthpac','trizetto','waystar'].includes(s.id))continue;if(s.sig.test(hay))return s.id}
+  for(const id of ['ecw','trizetto','healthpac','waystar'])if(SYS_BY[id].sig.test(hay))return id;
+  return''}
+/* learned layouts (Teach layout) – kept in this browser; export/import to share with the team */
+let CUSTOM={labels:{},ptLabels:[],v:1};
+try{const s=localStorage.getItem('dw_layouts');if(s){const o=JSON.parse(s);if(o&&o.labels)CUSTOM=Object.assign({labels:{},ptLabels:[]},o)}}catch(e){}
+function saveCustom(){try{localStorage.setItem('dw_layouts',JSON.stringify(CUSTOM))}catch(e){}layInfo()}
+function layInfo(){const n=Object.keys(CUSTOM.labels).length+CUSTOM.ptLabels.length;const el=document.getElementById('layInfo');if(el)el.textContent=n?n+' learned label(s) saved in this browser':''}
+const escRe=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+function ptRegexes(){return CUSTOM.ptLabels.length?CUSTOM.ptLabels.map(l=>new RegExp('(?:^|\\s)'+escRe(l.replace(/[:#]\s*$/,''))+'\\s*[:#]?\\s+([A-Z][A-Za-z\'\\-]+(?:[\\s,]+[A-Z][A-Za-z\'.\\-]*){1,3}?)(?=\\s{2,}|\\s+[A-Z][A-Za-z ]{1,25}\\s*[:#]|\\s*$)','i')).concat(PT_RES):PT_RES}
+
+function parseText(text,src,rows){return parseDoc(text,src,rows)}
+function parseTextGeneric(text,src){
+  const out=[];const payer=detectPayer(text);
+  const chk=text.match(/(?:Check\s*#|Check No\.?|Check Number|EFT\s*#?|Reference ID|Check\/EFT\s*#?)\s*:?\s*([A-Z]*-?\d[\w-]{3,})/i);
+  const cd0=text.match(/(?:Check Date|Payment Date|Paid Date|Remit Date|\bPaid)\s*:?\s*(\d{1,2}\/\d{1,2}\/\d{2,4}|20\d{6})/i);const cd=cd0?[cd0[0],d8(cd0[1])]:null;
+  let ctx={patient:'',memberId:'',acct:'',icn:'',claimStatus:'',dx:'',codes:''};let block=[];
+  const flush=()=>{for(const o of block){if(!o.dx&&ctx.dx)o.dx=ctx.dx;if(!o.adj&&ctx.codesAdj)o.adj=ctx.codesAdj;if(!o.rarc&&ctx.codesR)o.rarc=ctx.codesR;if(!o.icn)o.icn=ctx.icn;if(!o.acct)o.acct=ctx.acct;if(!o.memberId)o.memberId=ctx.memberId;if(!o.claimStatus)o.claimStatus=ctx.claimStatus}block=[]};
+  for(const raw of text.split(/\r?\n/)){const L=raw.trim();if(!L)continue;let m;
+    if((m=L.match(/^([A-Z][A-Za-z' .-]+,\s*[A-Z][A-Za-z' .-]+?)\s+(?:HIC|MEMBER ID|ID)\s*[:#]/))){flush();ctx={patient:m[1].replace(/\s+/g,' ').trim(),memberId:'',acct:'',icn:'',claimStatus:'',dx:'',codesAdj:'',codesR:''}}
+    else if((m=L.match(/\bPatient(?:\s*Name)?\s*[:#]\s*([A-Z][A-Za-z ,.'-]{2,60})/i))||(m=L.match(/^\s*NAME\s*:?\s+([A-Z][A-Z ,.'-]{2,40}?)\s+(?=HIC|ID|ACNT|MID)/))||(m=L.match(/\bMember\s*Name\s*:?\s*([A-Z][A-Za-z ,.'-]{2,60})/i))){const nm=cleanName(m[1]);if(nm&&nm.length>2){flush();ctx={patient:nm,memberId:'',acct:'',icn:'',claimStatus:'',dx:'',codesAdj:'',codesR:''}}}
+    if((m=L.match(/(?:Member|Recipient|Patient|Subscriber|Insured Member|Insured)\s*(?:ID|Identification|#)[^:]{0,14}:\s*([A-Z0-9]{6,})/i))||(m=L.match(/\bHIC\s*:?\s*([A-Z0-9]{6,})/)))ctx.memberId=ctx.memberId||m[1];
+    if((m=L.match(/\b(?:Patient Account Number|Provider Claim ID|Pat\s*Ctrl\s*No|PatCtrlNo|ACNT|ACT|Account\s*#)\s*:\s*([A-Z0-9.]{3,})/i)||L.match(/(?:Patient Account Number|Provider Claim ID|ACNT)\s+([A-Z0-9]{3,})/i)))ctx.acct=ctx.acct||m[1];
+    if((m=L.match(/(?:Payer Claim (?:ID|Control)[^:]*|ICN\s*#?|Claim\s*(?:#|No\.?|Number))\s*:?\s*([A-Z0-9-]*\d[A-Z0-9-]{5,})/i)))ctx.icn=ctx.icn||m[1];
+    if((m=L.match(/Claim Status\s*:?\s*([A-Za-z0-9 -]{3,40})/i)))ctx.claimStatus=ctx.claimStatus||m[1].replace(/\s{2,}.*/,'').trim();
+    if(/\b(?:DX|Diag(?:nosis)?|ICD(?:-?10)?)\b/i.test(L)){const d=parseDx(L.replace(/^.*?\b(?:DX|Diag(?:nosis)?|ICD(?:-?10)?)\b/i,''));if(d.length)ctx.dx=[...new Set((ctx.dx?ctx.dx.split(', '):[]).concat(d))].join(', ')}
+    if(/Claim (?:Adj|Remark)|Remark Codes|Reason Code/i.test(L)){const a=(L.match(/\b(CO|PR|OA|PI|CR)\s*[-:]?\s*[A-Z]?\d{1,3}\b/g)||[]).map(x=>x.replace(/\s*[-:]?\s*/,'-').replace(/^(\w{2})-?/,'$1-'));const r=L.match(/\b(MA\d{2,3}|M\d{1,3}|N\d{1,3})\b/g)||[];if(a.length)ctx.codesAdj=[...new Set(a)].join(', ');if(r.length)ctx.codesR=[...new Set(r)].join(', ')}
+    const sl=parseServiceLine(L);
+    if(sl){const o=Object.assign({src,payer,check:chk?chk[1]:'',checkDate:cd?cd[1]:'',patient:ctx.patient,memberId:ctx.memberId,acct:ctx.acct,icn:ctx.icn,claimStatus:ctx.claimStatus,raw:L},sl);block.push(o);out.push(o)}
+  }
+  flush();return out}
+async function fromWorkbook(f){await loadScript(LIB.xlsx);const wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:false});let out=[];const prefer=wb.SheetNames.includes('All Lines')?['All Lines']:wb.SheetNames;
+  for(const sn of prefer){const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:false,defval:''});out=out.concat(parseTable(rows,f.name))}
+  if(!out.length){let txt='';for(const sn of wb.SheetNames)txt+=XLSX.utils.sheet_to_csv(wb.Sheets[sn]).replace(/,/g,'  ')+'\n';out=parseText(txt,f.name)}return out}
+async function pageRows(page){const tc=await page.getTextContent();let words=[];
+  for(const it of tc.items){const s=it.str;if(!s||!s.trim())continue;const x=it.transform[4],y=it.transform[5],w=it.width||0,cw=s.length?(w/s.length)||4:4;const re=/\S+/g;let m;
+    while((m=re.exec(s)))words.push({x0:x+m.index*cw,x1:x+(m.index+m[0].length)*cw,y,s:m[0],cw})}
+  /* rejoin dates that the PDF split into fragments (e.g. "01/05/" + "2026" or "01/05/20" + "26") so the year is never lost or mis-read */
+  const g=groupRows(words,2.5);
+  for(const r of g){const ws=r.words;for(let i=1;i<ws.length;i++){const pv=ws[i-1],cu=ws[i];
+      if((/^\d{1,2}\/\d{1,2}\/$/.test(pv.s)&&/^\d{2,4}$/.test(cu.s))||(/^\d{1,2}\/\d{1,2}\/\d{1,3}$/.test(pv.s)&&/^\d{1,2}$/.test(cu.s)&&(pv.s.split('/')[2].length+cu.s.length)<=4&&cu.x0-pv.x1<1.5*(pv.cw||4))){
+        pv.s+=cu.s;pv.x1=cu.x1;ws.splice(i,1);i--}}
+    r.text=rowText(ws)}
+  return g}
+let TW=null;
+async function ocrDoc(img,progress){await loadScript(LIB.tess);if(!TW){progress&&progress('Starting OCR engine (first time downloads ~10 MB)…');TW=await Tesseract.createWorker('eng')}
+  let r;try{r=await TW.recognize(img,{},{text:true,blocks:true})}catch(e){r=await TW.recognize(img)}
+  const words=[];(r.data.blocks||[]).forEach(b=>(b.paragraphs||[]).forEach(p=>(p.lines||[]).forEach(l=>(l.words||[]).forEach(w=>{const s=(w.text||'').trim();if(s&&w.bbox)words.push({x0:w.bbox.x0,x1:w.bbox.x1,y:-(w.bbox.y0+w.bbox.y1)/2,h:w.bbox.y1-w.bbox.y0,s,cw:(w.bbox.x1-w.bbox.x0)/Math.max(1,s.length)})}))));
+  if(!words.length)return{text:r.data.text||'',rows:null};
+  const hs=words.map(w=>w.h).sort((a,b)=>a-b);const rows=groupRows(words,Math.max(3,(hs[hs.length>>1]||10)*0.55));
+  rows.forEach(rw=>{rw.text=ocrFix(rw.text)});return{text:rows.map(rw=>rw.text).join('\n'),rows}}
+async function fromPdf(f,progress){await loadScript(LIB.pdf);pdfjsLib.GlobalWorkerOptions.workerSrc=LIB.pdfw;const doc=await pdfjsLib.getDocument({data:new Uint8Array(await f.arrayBuffer())}).promise;let rows=[];
+  for(let p=1;p<=doc.numPages;p++){progress&&progress('Reading page '+p+' of '+doc.numPages+'…');rows=rows.concat(await pageRows(await doc.getPage(p)))}
+  let text=rows.map(r=>r.text).join('\n'),scanned=false;
+  if(text.replace(/\s/g,'').length<60*doc.numPages){scanned=true;rows=[];for(let p=1;p<=doc.numPages;p++){progress&&progress('Scanned PDF – OCR page '+p+' of '+doc.numPages+'…');const page=await doc.getPage(p);const vp=page.getViewport({scale:2});const cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;const o=await ocrDoc(cv,progress);rows=rows.concat(o.rows||rowsFromText(o.text))}text=rows.map(r=>r.text).join('\n')}
+  DOCS[f.name]={text,rows,ocr:scanned};const r=parseText(text,f.name,rows);if(scanned&&r.format)r.format+=' · OCR';return r}
+async function fromDocx(f){await loadScript(LIB.mammoth);const ab=await f.arrayBuffer();const html=(await mammoth.convertToHtml({arrayBuffer:ab})).value;const dom=new DOMParser().parseFromString(html,'text/html');let out=[];
+  dom.querySelectorAll('table').forEach(tb=>{const rows=[...tb.querySelectorAll('tr')].map(tr=>[...tr.children].map(td=>td.textContent.trim()));out=out.concat(parseTable(rows,f.name))});
+  if(!out.length){const txt=(await mammoth.extractRawText({arrayBuffer:ab})).value;out=parseText(txt,f.name)}return out}
+async function fromImage(f,progress){progress&&progress('Running OCR on image…');const o=await ocrDoc(f,progress);DOCS[f.name]={text:o.text,rows:o.rows||rowsFromText(o.text),ocr:true};const r=parseText(o.text,f.name,o.rows);if(r.format)r.format+=' · OCR';return r}
+let DOCS={};
+const TEXT_EXT=['txt','835','edi','era','x12','dat','rmt','rpt','prn','out','lst','text','86','837'];
+let FILES={};
+function logLine(name,msg,cls){const d=document.createElement('div');d.innerHTML='<b>'+esc(name)+'</b> – <span class="'+(cls||'')+'">'+esc(msg)+'</span>';$('#log').prepend(d);return d}
+function setLog(d,msg,cls){d.querySelector('span').className=cls||'';d.querySelector('span').textContent=msg}
+async function handleFiles(list){for(const f of list){const ext=(f.name.split('.').pop()||'').toLowerCase();const entry=logLine(f.name,'Reading…');
+  try{let lines=[];
+    if(ext==='zip'){await loadScript(LIB.zip);const z=await JSZip.loadAsync(await f.arrayBuffer());const inner=[];for(const nm in z.files){const e=z.files[nm];if(e.dir||/(^|\/)(__MACOSX|\.)/.test(nm))continue;inner.push(new File([await e.async('blob')],nm.split('/').pop()))}
+      setLog(entry,'ZIP – '+inner.length+' file(s) found, reading each…','ok');await handleFiles(inner);continue}
+    if(['xlsx','xls','xlsm','ods'].includes(ext)){lines=await fromWorkbook(f);lines.format=lines.format||'Spreadsheet columns'}
+    else if(ext==='csv'){const t=await f.text();lines=parseTable(parseCSV(t),f.name);if(lines.length)lines.format='CSV columns';else lines=parseText(t.replace(/,/g,'  '),f.name)}
+    else if(TEXT_EXT.includes(ext)){const t=await f.text();DOCS[f.name]={text:t,rows:rowsFromText(t)};lines=parseText(t,f.name)}
+    else if(ext==='pdf')lines=await fromPdf(f,m=>setLog(entry,m));
+    else if(ext==='docx'){lines=await fromDocx(f);lines.format=lines.format||'Word table'}
+    else if(ext==='doc')throw new Error('Old .doc format cannot be read in a browser – open it in Word and Save As .docx, then upload.');
+    else if(['jpg','jpeg','png','tif','tiff','bmp','gif','webp'].includes(ext))lines=await fromImage(f,m=>setLog(entry,m));
+    else{const t=await f.text();if(/[\x00-\x08\x0E-\x1F]/.test(t.slice(0,2000)))throw new Error('Unsupported file type .'+ext+' – export the remittance as PDF, 835, Excel or CSV.');DOCS[f.name]={text:t,rows:rowsFromText(t)};lines=parseText(t,f.name)}
+    finishFile(f.name,lines,entry);
+  }catch(e){setLog(entry,e.message||String(e),'err')}
+  refreshFilters();render()}}
+function finishFile(name,lines,entry){
+  const chosen=$('#sysSel').value;const D=DOCS[name];if(D)repairDates(lines,D.text);const sysId=chosen||detectSystem(D?D.text:'',lines.format,name)||((FILES[name]||{}).sysId)||'';
+  const sysName=sysId?SYS_BY[sysId].name:'';lines.forEach(l=>{l.system=sysName});
+  const n=addLines(lines,'upload');
+  const sb=lines.reduce((t,l)=>t+(num(l.billed)||0),0),sp=lines.reduce((t,l)=>t+(num(l.paid)||0),0);let okB=null,okP=null,rec='';
+  if(lines.recon){okB=lines.recon.billed==null?null:Math.abs(sb-lines.recon.billed)<0.01;okP=lines.recon.paid==null?null:Math.abs(sp-lines.recon.paid)<0.01;
+    rec=' · Totals: billed '+money(sb)+(okB!=null?' vs document '+money(lines.recon.billed)+(okB?' ✓':' ✗'):'')+', paid '+money(sp)+(okP!=null?' vs document '+money(lines.recon.paid)+(okP?' ✓':' ✗'):'')+(lines.recon.check?' · check/EFT '+money(lines.recon.check):'')+((okB===false||okP===false)?' – review: lines may be missed or the payment includes provider-level adjustments.':'')}
+  const pts=new Set(lines.map(l=>l.patient).filter(Boolean)).size,cls=new Set(lines.map(claimKey)).size;
+  FILES[name]={name,format:lines.format||'—',sysId,system:sysName,lines:lines.length,claims:cls,billed:sb,paid:sp,okB,okP,recon:lines.recon||null};
+  const fmt=lines.format?' ['+(sysName?sysName+' · ':'')+lines.format+']':(sysName?' ['+sysName+']':'');
+  const bad=!lines.length||okB===false||okP===false||!pts;
+  if(n)setLog(entry,n+' line(s) / '+cls+' claim(s) / '+pts+' patient(s) added'+fmt+(lines.length>n?' ('+(lines.length-n)+' duplicate(s) skipped)':'')+rec+(!pts?' · no patient names found – use Teach layout.':''),bad?'warn':'ok');
+  else setLog(entry,lines.length?'All lines were already loaded (duplicates skipped).':'No claim lines recognised'+fmt+'. Upload the raw 835/ERA file for this check, or click Teach layout to map this printout once.','warn');
+  if(DOCS[name]&&bad&&!entry.querySelector('[data-teach]'))entry.insertAdjacentHTML('beforeend','<button class="btn sm" type="button" data-teach="'+esc(name)+'">Teach layout</button>');
+  renderSystems()}
+
+/* ===== Teach layout ===== */
+let TEACH=null;
+const KIND_OPTS=[['','— not used —'],['dos','Service date (from)'],['dosTo','Service date (to)'],['cpt','CPT / HCPCS (with modifiers)'],['mod','Modifier(s)'],['units','Units'],['billed','Billed / charge'],['allowed','Allowed'],['paid','Paid (to provider)'],['deduct','Deductible'],['coins','Coinsurance'],['copay','Copay'],['ptResp','Patient responsibility'],['adj','Adjustment / denial codes'],['rarc','Remark codes'],['pos','Place of service'],['ignore','Ignore this column']];
+function openTeach(name){const names=Object.keys(DOCS);if(!names.length){alert('Upload the EOB / remittance file first (PDF, scan, image or text), then teach its layout.');return}
+  TEACH={name:name&&DOCS[name]?name:names[names.length-1],row:null,merge:false};renderTeach();$('#teach').hidden=false;$('#scrim').hidden=false}
+function closeTeach(){$('#teach').hidden=true;if($('#drawer').hidden)$('#scrim').hidden=true;TEACH=null}
+function renderTeach(){const d=DOCS[TEACH.name];const rows=d.rows||[];let h='<div class="dh"><div><h2>Teach layout</h2><div class="muted small">Map this printout\'s columns once – the page remembers the column labels for every future file (stored in this browser; use Export saved layouts to share).</div></div><button class="btn sm" type="button" data-tclose="1">✕</button></div><div class="db">';
+  h+='<label class="small">File: <select data-tfile="1">'+Object.keys(DOCS).map(n=>'<option'+(n===TEACH.name?' selected':'')+'>'+esc(n)+'</option>').join('')+'</select></label>';
+  if(TEACH.row==null){const cands=rows.map((r,i)=>({r,i})).filter(({r})=>!r.words.some(w=>MONEY_RE.test(w.s))&&phrases(r.words,medianCw(r.words)).length>=3).slice(0,60);
+    h+='<h3>Step 1 – click the row that holds the service-line column headings</h3>'+(cands.length?'':'<p class="muted">No heading rows found in this file. If it is a scan, check the OCR quality; otherwise upload the raw 835.</p>')+cands.map(({r,i})=>'<button class="rowpick" type="button" data-trow="'+i+'">'+esc(r.text)+'</button>').join('');
+    h+='<details style="margin-top:10px"><summary>Show first 40 lines of the document</summary><pre>'+esc(rows.slice(0,40).map(r=>r.text).join('\n'))+'</pre></details>'}
+  else{const r=rows[TEACH.row],cw=medianCw(r.words);let ph=phrases(r.words,cw);const nx=rows[TEACH.row+1];if(TEACH.merge&&nx)ph=stackRows(ph,phrases(nx.words,medianCw(nx.words)),cw);
+    TEACH.ph=ph;
+    h+='<h3>Step 2 – tell us what each heading is</h3><label class="small"><input type="checkbox" data-tmerge="1"'+(TEACH.merge?' checked':'')+'> Headings continue on the next line (two-line headings)</label>';
+    h+='<table class="mini" style="margin-top:8px"><thead><tr><th>Heading as printed</th><th>Means</th></tr></thead><tbody>'+ph.map((p,i)=>{const k=colKind(p.s)||'';return'<tr><td><code>'+esc(p.s)+'</code></td><td><select data-tkind="'+i+'">'+KIND_OPTS.map(([v,l])=>'<option value="'+v+'"'+(v===k?' selected':'')+'>'+esc(l)+'</option>').join('')+'</select></td></tr>'}).join('')+'</tbody></table>';
+    h+='<h4>Sample rows under this heading</h4><pre>'+esc(rows.slice(TEACH.row+1,TEACH.row+6).map(x=>x.text).join('\n'))+'</pre>';
+    h+='<h4>Patient name label (optional)</h4><div class="small muted">Type the label printed before the patient name if names are not picked up, e.g. <code>Patient:</code>, <code>Member Name</code>, <code>Pt</code>.</div><input type="text" data-tpt="1" placeholder="e.g. Patient Name" style="width:260px">';
+    h+='<h4>Billing system</h4><select data-tsys="1"><option value="">(auto-detect)</option>'+SYSTEMS.map(s=>'<option value="'+s.id+'"'+(((FILES[TEACH.name]||{}).sysId===s.id)?' selected':'')+'>'+esc(s.name)+'</option>').join('')+'</select>';
+    h+='<div style="margin-top:12px;display:flex;gap:8px"><button class="btn" type="button" data-tback="1">Back</button><button class="btn primary" type="button" data-tsave="1">Save layout &amp; re-read file</button></div>'}
+  $('#teach').innerHTML=h+'</div>'}
+function saveTeach(){const sel=[...$('#teach').querySelectorAll('[data-tkind]')];
+  sel.forEach(s=>{const p=TEACH.ph[+s.dataset.tkind];const L=normLab(p.s);if(!L)return;if(s.value)CUSTOM.labels[L]=s.value;else if(colKind(p.s))CUSTOM.labels[L]='ignore'});
+  const pt=($('#teach').querySelector('[data-tpt]').value||'').trim();if(pt&&!CUSTOM.ptLabels.includes(pt))CUSTOM.ptLabels.unshift(pt);
+  const sys=$('#teach').querySelector('[data-tsys]').value;saveCustom();const name=TEACH.name;closeTeach();reparse(name,sys)}
+function reparse(name,sysId){const d=DOCS[name];if(!d)return;LINES=LINES.filter(l=>l.src!==name);const r=parseText(d.text,name,d.rows);if(d.ocr&&r.format)r.format+=' · OCR';
+  const keep=$('#sysSel').value;if(sysId)$('#sysSel').value=sysId;const entry=logLine(name,'Re-reading with learned layout…');finishFile(name,r,entry);$('#sysSel').value=keep;refreshFilters();render()}
+
+/* ===== Billing systems tab ===== */
+function renderSystems(){const tb=$('#sysT tbody');if(!tb)return;const by={};Object.values(FILES).forEach(F=>{if(F.sysId)(by[F.sysId]=by[F.sysId]||[]).push(F)});
+  tb.innerHTML=SYSTEMS.map(s=>{const fs=by[s.id]||[];const conf=fs.filter(F=>F.okB||F.okP).length;
+    const st=conf?'<span class="pill p-grn">✓ Confirmed on '+conf+' file(s)</span>':VERIFIED[s.id]?'<span class="pill p-grn">'+esc(VERIFIED[s.id])+'</span>':TESTED[s.id]?'<span class="pill p-amb">'+esc(TESTED[s.id])+'</span>':'<span class="pill p-gry">Profile – confirm with first file</span>';
+    return'<tr><td><b>'+esc(s.name)+'</b></td><td class="small">'+esc(s.type)+'</td><td class="small"><code>'+esc(s.sig.source.replace(/\\[sb]\*?|\\/g,'').replace(/\|/g,' | ').slice(0,70))+'</code> on the document or file name, or chosen in the Billing system list</td><td class="small">'+esc(s.read)+(s.note?'<br><span class="muted">'+esc(s.note)+'</span>':'')+'</td><td>'+st+'</td><td class="num">'+(fs.length||'')+'</td><td class="small">'+esc(s.best)+'</td></tr>'}).join('')}
+
+/* ===== summary ===== */
+function summaryData(list){list=list||LINES;const an=list.map(l=>[l,analyze(l)]);
+  const files={},payers={},stats={},reasons={};
+  for(const [l,a] of an){const b=num(l.billed)||0,p=num(l.paid)||0,den=/denied/i.test(a.status);
+    const f=files[l.src]=files[l.src]||{file:l.src,payers:new Set(),claims:new Set(),lines:0,billed:0,paid:0,denied:0,deniedAmt:0,dx:0};
+    f.payers.add(l.payer||'—');f.claims.add(claimKey(l));f.lines++;f.billed+=b;f.paid+=p;if(den){f.denied++;f.deniedAmt+=b}if(a.dxRel)f.dx++;
+    const py=payers[l.payer||'—']=payers[l.payer||'—']||{payer:l.payer||'—',claims:new Set(),lines:0,billed:0,paid:0,denied:0,deniedAmt:0,dx:0};
+    py.claims.add(claimKey(l));py.lines++;py.billed+=b;py.paid+=p;if(den){py.denied++;py.deniedAmt+=b}if(a.dxRel)py.dx++;
+    const s=stats[a.status]=stats[a.status]||{status:a.status,lines:0,billed:0,paid:0};s.lines++;s.billed+=b;s.paid+=p;
+    if(/denied|zero|pending|review|reduced/i.test(a.status))for(const i of a.issues){if(i.sev==='info'||i.sev==='pr')continue;const k=i.code;
+      const r=reasons[k]=reasons[k]||{code:k,meaning:i.m,fix:i.fix,dx:!!i.dx,lines:0,billed:0,patients:new Set()};r.lines++;r.billed+=b;r.patients.add(l.patient)}}
+  const fileRows=Object.values(files).map(f=>{const F=FILES[f.file]||{};const rec=F.okB===false||F.okP===false?'✗ check':(F.okB||F.okP)?'✓ matches':'—';
+    return{'Source File':f.file,'Billing System':F.system||'','Format Detected':F.format||(LINES.some(x=>x.src===f.file&&x.origin==='batch')?'Oct-2026 review batch':'—'),'Payer(s)':[...f.payers].join(', '),'Claims':f.claims.size,'Lines':f.lines,'Billed':+f.billed.toFixed(2),'Paid':+f.paid.toFixed(2),'Denied Lines':f.denied,'Denied $ (billed)':+f.deniedAmt.toFixed(2),'DX-Issue Lines':f.dx,'Totals Check':rec}});
+  const payerRows=Object.values(payers).sort((a,b)=>b.billed-a.billed).map(p=>({'Payer':p.payer,'Claims':p.claims.size,'Lines':p.lines,'Billed':+p.billed.toFixed(2),'Paid':+p.paid.toFixed(2),'Paid %':p.billed?+(100*p.paid/p.billed).toFixed(1):0,'Denied Lines':p.denied,'Denied $ (billed)':+p.deniedAmt.toFixed(2),'DX-Issue Lines':p.dx}));
+  const statusRows=Object.values(stats).sort((a,b)=>b.lines-a.lines).map(s=>({'Line Status':s.status,'Lines':s.lines,'Billed':+s.billed.toFixed(2),'Paid':+s.paid.toFixed(2)}));
+  const reasonRows=Object.values(reasons).sort((a,b)=>b.billed-a.billed).map(r=>({'Code':r.code,'Meaning':r.meaning,'DX-Related':r.dx?'Yes':'No','Lines':r.lines,'Patients':r.patients.size,'Billed $ Affected':+r.billed.toFixed(2),'How to Resolve':r.fix}));
+  return{fileRows,payerRows,statusRows,reasonRows,an}}
+function tblHTML(rows,moneyCols){if(!rows.length)return'<tr><td class="empty">No data</td></tr>';const h=Object.keys(rows[0]);
+  return'<thead><tr>'+h.map(k=>'<th'+(moneyCols.includes(k)?' class="num"':'')+'>'+esc(k)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+h.map(k=>{const v=r[k];const m=moneyCols.includes(k);return'<td'+(m?' class="num"':'')+'>'+(m&&typeof v==='number'&&/Billed|Paid$|\$/.test(k)&&!/%|Lines/.test(k)?money(v):esc(v))+'</td>'}).join('')+'</tr>').join('')+'</tbody>'}
+function renderSummary(){if($('#tab-sum').hidden)return;const d=summaryData();const tb=d.an.reduce((t,[l])=>t+(num(l.billed)||0),0),tp=d.an.reduce((t,[l])=>t+(num(l.paid)||0),0);const den=d.an.filter(([,a])=>/denied/i.test(a.status));
+  $('#sumK').innerHTML=[['Files',d.fileRows.length],['Payers',d.payerRows.length],['Claims',new Set(LINES.map(claimKey)).size],['Lines',LINES.length],['Billed',money(tb)],['Paid',money(tp)],['Paid % of billed',tb?(100*tp/tb).toFixed(1)+'%':'—'],['Denied lines',den.length],['Denied $',money(den.reduce((t,[l])=>t+(num(l.billed)||0),0))],['DX-issue lines',d.an.filter(([,a])=>a.dxRel).length]].map(([k,v])=>'<div class="kpi"><b>'+v+'</b><span>'+k+'</span></div>').join('');
+  const M=['Billed','Paid','Denied $ (billed)','Billed $ Affected','Paid %','Claims','Lines','Denied Lines','DX-Issue Lines','Patients'];
+  $('#sumF').innerHTML=tblHTML(d.fileRows,M);$('#sumP').innerHTML=tblHTML(d.payerRows,M);$('#sumS').innerHTML=tblHTML(d.statusRows,M);$('#sumR').innerHTML=tblHTML(d.reasonRows.slice(0,40),M)}
+
+/* ===== reference tabs ===== */
+function renderRef(){const q=$('#rq').value.trim().toLowerCase();$('#refT tbody').innerHTML=XW.filter(x=>!q||(x.codes+' '+x.name+' '+x.note+' '+x.show.map(c=>c+' '+dxDesc(c)).join(' ')).toLowerCase().includes(q)).map(x=>'<tr><td class="cpt">'+esc(x.codes)+'</td><td>'+esc(x.name)+'</td><td>'+(x.show.length?'<ul>'+x.show.map(c=>'<li><span class="icd">'+esc(c)+'</span> '+esc(dxDesc(c))+'</li>').join('')+'</ul>':'<span class="muted">'+(x.noDx?'Same DX as primary procedure / none needed':'')+'</span>')+'</td><td>'+esc(x.note)+'</td></tr>').join('')}
+function renderCodes(){const q=$('#cq').value.trim().toLowerCase();const rows=[];
+  for(const k in CARC)rows.push(['CARC '+k,'CARC',CARC[k]]);for(const k in RARC)rows.push([k,'RARC',RARC[k]]);for(const k in PAYER)rows.push([k,'Payer code',PAYER[k]]);
+  $('#codeT tbody').innerHTML=rows.filter(([c,t,d])=>!q||(c+' '+t+' '+d.m+' '+d.fix).toLowerCase().includes(q)).map(([c,t,d])=>'<tr><td><code>'+esc(c)+'</code></td><td>'+esc(t)+'</td><td>'+esc(d.m)+'</td><td>'+esc(d.fix)+'</td><td>'+(d.dx?'<span class="pill p-red">Yes</span>':'No')+'</td></tr>').join('')}
+
+/* ===== wiring ===== */
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));['claims','sum','ref','codes','sys'].forEach(t=>$('#tab-'+t).hidden=(t!==b.dataset.tab));renderSummary();renderSystems()}));
+$('#sysSel').innerHTML='<option value="">Auto-detect</option>'+SYSTEMS.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
+$('#btnTeach').addEventListener('click',()=>openTeach());
+$('#log').addEventListener('click',e=>{const b=e.target.closest('[data-teach]');if(b)openTeach(b.dataset.teach)});
+$('#teach').addEventListener('click',e=>{const t=e.target.closest('button');if(!t||!TEACH)return;
+  if(t.dataset.tclose)return closeTeach();if(t.dataset.trow){TEACH.row=+t.dataset.trow;TEACH.merge=false;renderTeach();return}
+  if(t.dataset.tback){TEACH.row=null;renderTeach();return}if(t.dataset.tsave)saveTeach()});
+$('#teach').addEventListener('change',e=>{if(!TEACH)return;if(e.target.dataset.tfile){TEACH={name:e.target.value,row:null,merge:false};renderTeach()}else if(e.target.dataset.tmerge){TEACH.merge=e.target.checked;renderTeach()}});
+$('#btnLayExp').addEventListener('click',()=>download('EOB_learned_layouts_'+stamp()+'.json',new Blob([JSON.stringify(CUSTOM,null,1)],{type:'application/json'})));
+$('#layImp').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const o=JSON.parse(await f.text());if(!o||typeof o.labels!=='object')throw new Error('Not a layouts file');Object.assign(CUSTOM.labels,o.labels);(o.ptLabels||[]).forEach(p=>{if(!CUSTOM.ptLabels.includes(p))CUSTOM.ptLabels.push(p)});saveCustom();logLine(f.name,'Imported '+Object.keys(o.labels).length+' learned label(s). Re-upload files to apply.','ok')}catch(err){logLine(f.name,'Could not import layouts: '+err.message,'err')}});
+$('#btnLayReset').addEventListener('click',()=>{if(!confirm('Remove all learned layouts from this browser?'))return;CUSTOM={labels:{},ptLabels:[],v:1};saveCustom()});
+['#fq','#fStatus','#fPayer','#fSrc','#fDx','#fOpen'].forEach(s=>$(s).addEventListener(s==='#fq'?'input':'change',render));
+$('#rq').addEventListener('input',renderRef);$('#cq').addEventListener('input',renderCodes);
+$('#grid tbody').addEventListener('click',e=>{const tr=e.target.closest('tr[data-id]');if(tr)openClaim(+tr.dataset.id)});
+$('#scrim').addEventListener('click',()=>{if(TEACH)closeTeach();else closeDrawer()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&OPEN)closeDrawer()});
+$('#drawer').addEventListener('click',e=>{const t=e.target.closest('button,.chip');if(!t)return;
+  if(t.id==='dClose')return closeDrawer();
+  if(t.id==='dCopy'){const l=LINES.find(x=>x.id===OPEN);const steps=JSON.parse($('#drawer').dataset.steps||'[]');const txt='Claim: '+l.patient+' | '+l.payer+' | ICN '+(l.icn||'-')+' | Acct '+(l.acct||'-')+'\n'+steps.map((s,i)=>(i+1)+'. '+s).join('\n');(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>{t.textContent='Copied ✓';setTimeout(()=>t.textContent='Copy resolution',1500)}).catch(()=>prompt('Copy the resolution:',txt));return}
+  if(t.id==='dExp'){const l=LINES.find(x=>x.id===OPEN);const k=claimKey(l);exportCSV(LINES.filter(x=>claimKey(x)===k),'Claim_'+(l.patient||'').replace(/[^A-Za-z0-9]+/g,'_')+'_'+(l.icn||l.acct||''));return}
+  if(t.dataset.check){const id=+t.dataset.check;const l=LINES.find(x=>x.id===id);l.dxUser=document.getElementById('dx-'+id).value.trim();openClaim(OPEN);render();return}
+  if(t.dataset.add){const id=+t.dataset.line;const inp=document.getElementById('dx-'+id);const cur=parseDx(inp.value);if(!cur.includes(t.dataset.add))cur.push(t.dataset.add);inp.value=cur.join(', ');return}
+  if(t.dataset.del){if(!confirm('Remove this line from the workbench?'))return;const id=+t.dataset.del;LINES=LINES.filter(x=>x.id!==id);const rest=LINES.find(x=>x.id===OPEN);rest?openClaim(OPEN):closeDrawer();refreshFilters();render()}});
+$('#drawer').addEventListener('input',e=>{if(e.target.dataset.note){const l=LINES.find(x=>x.id===+e.target.dataset.note);if(l)l.note=e.target.value}});
+$('#btnExportX').addEventListener('click',()=>exportXLSX(filtered()));
+$('#btnExportC').addEventListener('click',()=>exportCSV(filtered()));
+$('#btnClear').addEventListener('click',()=>{if(LINES.length&&!confirm('Clear all claims from the workbench? (Export first if you need the results.)'))return;LINES=[];FILES={};closeDrawer();refreshFilters();render()});
+$('#file').addEventListener('change',e=>{handleFiles([...e.target.files]);e.target.value=''});
+const dz=$('#drop');['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag')}));['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag')}));dz.addEventListener('drop',e=>handleFiles([...e.dataTransfer.files]));
+
+refreshFilters();render();renderRef();renderCodes();renderSystems();layInfo();
+</script>
+</body>
+</html>
+
